@@ -37,6 +37,30 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'treat', name: 'Earned it', description: 'Redeem your first reward', measure: (_, s) => s.redemptions.length, goal: 1 },
 ];
 
+export interface AchievementStatus {
+  achievement: Achievement;
+  /** Progress toward the goal, capped at the goal. */
+  value: number;
+  unlocked: boolean;
+}
+
+export function achievementStatuses(p: Progress, s: AppState, list: Achievement[] = ACHIEVEMENTS): AchievementStatus[] {
+  return list.map((achievement) => {
+    const value = Math.max(0, Math.min(achievement.goal, achievement.measure(p, s)));
+    return { achievement, value, unlocked: value >= achievement.goal };
+  });
+}
+
+/** Locked achievements nearest to their goal by fraction done. Ties keep list order. */
+export function closestToUnlock(statuses: AchievementStatus[], count: number): AchievementStatus[] {
+  return statuses
+    .map((status, index) => ({ status, index, fraction: status.value / status.achievement.goal }))
+    .filter((x) => !x.status.unlocked)
+    .sort((a, b) => b.fraction - a.fraction || a.index - b.index)
+    .slice(0, count)
+    .map((x) => x.status);
+}
+
 export function unlockedIds(p: Progress, s: AppState): Set<string> {
-  return new Set(ACHIEVEMENTS.filter((a) => a.measure(p, s) >= a.goal).map((a) => a.id));
+  return new Set(achievementStatuses(p, s).filter((x) => x.unlocked).map((x) => x.achievement.id));
 }

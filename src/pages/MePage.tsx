@@ -4,7 +4,7 @@ import { useRef, useState, type ChangeEvent } from 'react';
 import { confirmAction } from '../components/Dialog';
 import { Icon } from '../components/Icon';
 import { SyncSettings } from '../components/SyncSettings';
-import { ACHIEVEMENTS } from '../lib/achievements';
+import { achievementStatuses, closestToUnlock } from '../lib/achievements';
 import { downloadText } from '../lib/csv';
 import { formatShort } from '../lib/dates';
 import { levelInfo, scheduleLabel } from '../lib/engine';
@@ -24,6 +24,26 @@ export function MePage() {
   const [importError, setImportError] = useState<string | null>(null);
   const lvl = levelInfo(progress.totalXp);
   const archived = state.habits.filter((h) => h.archivedOn !== null);
+
+  // Achievements start collapsed to the few closest to unlocking, so the list isn't a long scroll on phones.
+  const [showAll, setShowAll] = useState(false);
+  const achTitleRef = useRef<HTMLHeadingElement>(null);
+  const statuses = achievementStatuses(progress, state);
+  const unlockedCount = statuses.filter((x) => x.unlocked).length;
+  const nextUp = closestToUnlock(statuses, 3);
+  const shown = showAll ? statuses : nextUp;
+
+  const toggleAll = () => {
+    if (showAll) {
+      // Collapsing from far down the page would leave you below the section, so jump back to its heading.
+      const title = achTitleRef.current;
+      if (title && title.getBoundingClientRect().top < 0) {
+        title.scrollIntoView({ block: 'start' });
+        title.focus({ preventScroll: true });
+      }
+    }
+    setShowAll(!showAll);
+  };
 
   const exportJson = () => downloadText(`sprout-isle-backup-${today}.json`, JSON.stringify(state, null, 2), 'application/json');
 
@@ -82,31 +102,61 @@ export function MePage() {
         </div>
       </div>
 
-      <section aria-labelledby="ach-title">
-        <h2 id="ach-title">Achievements</h2>
-        <ul className="achievements">
-          {ACHIEVEMENTS.map((a) => {
-            const value = Math.min(a.goal, a.measure(progress, state));
-            const unlocked = value >= a.goal;
-            return (
+      <section aria-labelledby="ach-title" className="achievements-section">
+        <header className="achievements__head">
+          <h2 id="ach-title" ref={achTitleRef} tabIndex={-1}>
+            Achievements
+          </h2>
+          <span className="achievements__count">
+            {unlockedCount} of {statuses.length}
+          </span>
+        </header>
+        <div
+          className="achievements__bar"
+          style={{ gridTemplateColumns: `repeat(${statuses.length}, 1fr)` }}
+          role="progressbar"
+          aria-label="Achievements unlocked"
+          aria-valuemin={0}
+          aria-valuemax={statuses.length}
+          aria-valuenow={unlockedCount}
+        >
+          {statuses.map((x) => (
+            <span key={x.achievement.id} className={x.unlocked ? 'on' : undefined} />
+          ))}
+        </div>
+
+        {!showAll && (
+          <p className="achievements__hint muted">
+            {nextUp.length > 0 ? 'Closest to unlocking' : `You've unlocked all ${statuses.length}.`}
+          </p>
+        )}
+        {shown.length > 0 && (
+          <ul id="achievement-list" className="achievements">
+            {shown.map(({ achievement: a, value, unlocked }) => (
               <li key={a.id} className={`achievement${unlocked ? ' is-unlocked' : ''}`}>
                 <span className="achievement__badge" aria-hidden="true">
                   <Icon name="star" size={18} />
                 </span>
-                <div>
+                <div className="achievement__body">
                   <strong>{a.name}</strong>
                   <span className="muted">{a.description}</span>
                   {!unlocked && a.goal > 1 && (
                     <span className="achievement__progress">
+                      <span className="achievement__meter" aria-hidden="true">
+                        <span style={{ width: `${Math.round((value / a.goal) * 100)}%` }} />
+                      </span>
                       {value} of {a.goal}
                     </span>
                   )}
                   <span className="visually-hidden">{unlocked ? 'Unlocked' : 'Locked'}</span>
                 </div>
               </li>
-            );
-          })}
-        </ul>
+            ))}
+          </ul>
+        )}
+        <button type="button" className="btn btn--tiny achievements__toggle" aria-expanded={showAll} aria-controls="achievement-list" onClick={toggleAll}>
+          {showAll ? 'Show fewer' : `Show all ${statuses.length}`}
+        </button>
       </section>
 
       {archived.length > 0 && (

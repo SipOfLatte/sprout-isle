@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.7.0 (2026-09-18)
+
+### Changed
+- Achievements on the You tab are much shorter. The section shows how many you've unlocked, a bar with one block per achievement, and the three you're closest to finishing. Show all 21 opens the full list, and Show fewer takes you back to the heading.
+- Achievements that need more than one step now have a small progress bar next to the count.
+
 ## 2.6.0 (2026-09-18)
 
 ### Added
