@@ -18,9 +18,10 @@ const TABS: { id: string; label: string; icon: IconName }[] = [
   { id: 'me', label: 'You', icon: 'person' },
 ];
 
-function readHash() {
-  const id = window.location.hash.slice(1);
-  return TABS.some((t) => t.id === id) ? id : 'today';
+/** Routes look like `#insights` or `#today/2026-09-14`. */
+function readRoute() {
+  const [id, param] = window.location.hash.slice(1).split('/');
+  return TABS.some((t) => t.id === id) ? { tab: id, param } : { tab: 'today', param: undefined };
 }
 
 function useCelebrations() {
@@ -43,20 +44,21 @@ function useCelebrations() {
 }
 
 export default function App() {
-  const [tab, setTab] = useState(readHash);
+  const [route, setRoute] = useState(readRoute);
+  const { tab } = route;
   const { saveFailed } = useStore();
   const mainRef = useRef<HTMLElement>(null);
   useCelebrations();
 
   useEffect(() => {
-    const onHash = () => setTab(readHash());
+    const onHash = () => setRoute(readRoute());
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
   const go = (id: string) => {
     window.location.hash = id;
-    setTab(id);
+    setRoute(readRoute());
     window.scrollTo({ top: 0 });
     mainRef.current?.focus({ preventScroll: true });
   };
@@ -93,7 +95,7 @@ export default function App() {
             Your browser blocked saving, so changes will be lost when you close this tab. Export a backup from the You tab.
           </p>
         )}
-        {tab === 'today' && <TodayPage onNavigate={go} />}
+        {tab === 'today' && <TodayPage dayParam={route.param} onNavigate={go} />}
         {tab === 'world' && <WorldPage />}
         {tab === 'insights' && <InsightsPage />}
         {tab === 'shop' && <ShopPage />}

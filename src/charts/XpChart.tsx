@@ -1,5 +1,7 @@
 import { scaleBand, scaleLinear } from 'd3-scale';
 import { formatShort, fromKey, WEEKDAY_SHORT, weekday } from '../lib/dates';
+import { openDay } from '../lib/nav';
+import { useStore } from '../state/store';
 import { ChartCard, columnPath, EmptyChart, Legend, useTooltip, useWidth } from './common';
 
 const HEIGHT = 180;
@@ -20,6 +22,7 @@ function niceMax(v: number) {
 
 export function XpChart({ points, monthly }: { points: Point[]; monthly: boolean }) {
   const [ref, width] = useWidth<HTMLDivElement>();
+  const { today } = useStore();
   const { wrapRef, show, hide, node } = useTooltip();
   const total = (p: Point) => p.health + p.work + p.bonus;
   const max = niceMax(Math.max(10, ...points.map(total)));
@@ -105,7 +108,11 @@ export function XpChart({ points, monthly }: { points: Point[]; monthly: boolean
                       {monthly ? (d === 1 || (i + 1) % (width < 480 ? 7 : 5) === 0 ? d : '') : WEEKDAY_SHORT[weekday(p.day)]}
                     </text>
                     <rect
-                      className="hit"
+                      className="hit is-clickable"
+                      role="button"
+                      aria-label={`Open ${formatShort(p.day)}`}
+                      onClick={() => openDay(p.day, today)}
+                      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), openDay(p.day, today))}
                       x={x(p.day)}
                       y={M.top}
                       width={x.step()}

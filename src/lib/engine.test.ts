@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { addDays } from './dates';
-import { computeProgress, habitStreak, levelInfo, PERFECT_DAY_BONUS, COMEBACK_BONUS } from './engine';
+import { computeProgress, dayTally, habitStreak, levelInfo, PERFECT_DAY_BONUS, COMEBACK_BONUS } from './engine';
 import type { AppState, Habit } from './types';
 
 const T = '2026-09-17'; // a Thursday
@@ -86,5 +86,16 @@ describe('habitStreak', () => {
     const h = habit({ schedule: { kind: 'weekly', times: 1 } });
     const logs = logDays('h1', ['2026-09-02', '2026-09-08']);
     expect(habitStreak(state([h], logs), h, T)).toBe(2); // this week not done yet, doesn't break
+  });
+});
+
+describe('dayTally', () => {
+  it('counts a weekly habit only while its quota is open or on days it was done', () => {
+    const daily = habit();
+    const weekly = habit({ id: 'w', schedule: { kind: 'weekly', times: 1 } });
+    const logs = { '2026-09-14': { w: 1 }, '2026-09-15': { h1: 1 } };
+    const s = state([daily, weekly], logs);
+    expect(dayTally(s, '2026-09-14')).toEqual({ due: 2, done: 1 }); // weekly done Monday
+    expect(dayTally(s, '2026-09-15')).toEqual({ due: 1, done: 1 }); // quota met, weekly drops out
   });
 });

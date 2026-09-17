@@ -49,6 +49,28 @@ export function isDueOn(habit: Habit, day: DateKey): boolean {
   return habit.schedule.kind === 'weekly' ? true : isPinnedTo(habit, day);
 }
 
+/** Whether a habit counts toward a day's "X of Y done". A weekly habit counts
+ *  on days it was done, and on other days only while its quota is still open. */
+export function countsTowardDay(state: AppState, habit: Habit, day: DateKey): boolean {
+  if (!isActiveOn(habit, day)) return false;
+  const s = habit.schedule;
+  if (s.kind !== 'weekly') return isPinnedTo(habit, day);
+  const doneToday = isDone(habit, amountOn(state, habit.id, day));
+  const earlier = weekCompletions(state, habit, day) - (doneToday ? 1 : 0);
+  return doneToday || earlier < s.times;
+}
+
+export function dayTally(state: AppState, day: DateKey): { due: number; done: number } {
+  let due = 0;
+  let done = 0;
+  for (const h of state.habits) {
+    if (!countsTowardDay(state, h, day)) continue;
+    due++;
+    if (isDone(h, amountOn(state, h.id, day))) done++;
+  }
+  return { due, done };
+}
+
 export interface DayXp {
   health: number;
   work: number;

@@ -5,8 +5,10 @@ import { Icon } from '../components/Icon';
 import { Isle } from '../components/Isle';
 import { PlayerBar } from '../components/PlayerBar';
 import { QuestBoard } from '../components/QuestBoard';
-import { addDays, diffDays, formatLong, type DateKey } from '../lib/dates';
-import { amountOn, isActiveOn, isDone, isDueOn } from '../lib/engine';
+import { WeekStrip } from '../components/DayBrowser';
+import { diffDays, formatLong, type DateKey } from '../lib/dates';
+import { openDay } from '../lib/nav';
+import { dayTally, isActiveOn, isDueOn } from '../lib/engine';
 import { AREA_LABEL, XP_BY_DIFFICULTY, type Area, type Difficulty, type Habit } from '../lib/types';
 import { useFx } from '../state/fx';
 import { useStore } from '../state/store';
@@ -22,19 +24,22 @@ const STARTERS: (HabitDraft & { name: string })[] = [
   { name: 'Plan tomorrow', area: 'work', difficulty: 'easy', schedule: { kind: 'daily' } },
 ];
 
-export function TodayPage({ onNavigate }: { onNavigate: (tab: string) => void }) {
+export function TodayPage({ dayParam, onNavigate }: { dayParam?: string; onNavigate: (tab: string) => void }) {
   const { state, today, progress } = useStore();
-  const [day, setDay] = useState<DateKey>(today);
   const [editing, setEditing] = useState<{ habit: Habit | null; preset?: HabitDraft } | null>(null);
 
-  const viewDay = day > today ? today : day;
+  // The viewed day comes from the URL (#today/2026-09-14) so it survives reloads and browser back.
+  const viewDay = dayParam && /^\d{4}-\d{2}-\d{2}$/.test(dayParam) && dayParam < today ? dayParam : today;
+  const setDay = (d: DateKey) => openDay(d, today);
   const isToday = viewDay === today;
   const daysBack = diffDays(viewDay, today);
+  const editable = daysBack <= MAX_BACKFILL_DAYS;
+  const usedFreeze = progress.freezeDays.includes(viewDay);
 
   const active = state.habits.filter((h) => isActiveOn(h, viewDay));
   const due = active.filter((h) => isDueOn(h, viewDay));
   const other = active.filter((h) => !isDueOn(h, viewDay));
-  const doneCount = due.filter((h) => isDone(h, amountOn(state, h.id, viewDay))).length;
+  const tally = dayTally(state, viewDay);
   const dayXp = progress.dailyXp[viewDay];
   const xpToday = dayXp ? dayXp.health + dayXp.work + dayXp.bonus : 0;
 
@@ -66,21 +71,20 @@ export function TodayPage({ onNavigate }: { onNavigate: (tab: string) => void })
             <h1 id="day-title">{isToday ? 'Today' : daysBack === 1 ? 'Yesterday' : `${daysBack} days ago`}</h1>
             <p className="day-head__date">{formatLong(viewDay)}</p>
           </div>
-          <div className="day-nav">
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={() => setDay(addDays(viewDay, -1))}
-              disabled={daysBack >= MAX_BACKFILL_DAYS}
-              aria-label="Previous day"
-            >
-              <Icon name="left" size={12} />
+          {!isToday && (
+            <button type="button" className="btn btn--tiny" onClick={() => setDay(today)}>
+              Back to today
             </button>
-            <button type="button" className="icon-btn" onClick={() => setDay(addDays(viewDay, 1))} disabled={isToday} aria-label="Next day">
-              <Icon name="right" size={12} />
-            </button>
-          </div>
+          )}
         </header>
+
+        <WeekStrip day={viewDay} onSelect={setDay} />
+
+        {!editable && (
+          <p className="notice notice--quiet">
+            You're looking back at this day. Days more than a week old are read-only, so streaks and XP stay honest.
+          </p>
+        )}
 
         {state.habits.length === 0 ? (
           <div className="empty">
@@ -98,16 +102,23 @@ export function TodayPage({ onNavigate }: { onNavigate: (tab: string) => void })
         ) : (
           <>
             <p className="day-summary">
-              {due.length === 0
-                ? 'Nothing scheduled. A good day for a to-do.'
-                : doneCount === due.length
-                  ? `All ${due.length} done. Your island thanks you.`
-                  : `${doneCount} of ${due.length} done`}
+              {tally.due === 0
+                ? isToday
+                  ? 'Nothing scheduled. A good day for a to-do.'
+                  : 'Nothing was scheduled.'
+                : tally.done === tally.due
+                  ? `All ${tally.due} done.${isToday ? ' Your island thanks you.' : ''}`
+                  : `${tally.done} of ${tally.due} done`}
               {xpToday > 0 && <span className="day-summary__xp">+{xpToday} XP</span>}
+              {usedFreeze && (
+                <span className="day-summary__freeze">
+                  <Icon name="freeze" size={12} /> Streak freeze used
+                </span>
+              )}
             </p>
             <ul className="habit-list">
               {due.map((h) => (
-                <HabitRow key={h.id} habit={h} day={viewDay} onEdit={(habit) => setEditing({ habit })} />
+                <HabitRow key={h.id} habit={h} day={viewDay} readOnly={!editable} onEdit={(habit) => setEditing({ habit })} />
               ))}
             </ul>
             {other.length > 0 && (
@@ -115,7 +126,7 @@ export function TodayPage({ onNavigate }: { onNavigate: (tab: string) => void })
                 <summary>Not scheduled {isToday ? 'today' : 'this day'} ({other.length})</summary>
                 <ul className="habit-list">
                   {other.map((h) => (
-                    <HabitRow key={h.id} habit={h} day={viewDay} onEdit={(habit) => setEditing({ habit })} />
+                    <HabitRow key={h.id} habit={h} day={viewDay} readOnly={!editable} onEdit={(habit) => setEditing({ habit })} />
                   ))}
                 </ul>
               </details>
@@ -127,7 +138,7 @@ export function TodayPage({ onNavigate }: { onNavigate: (tab: string) => void })
           <Icon name="plus" size={10} /> New habit
         </button>
 
-        <Todos day={viewDay} />
+        <Todos day={viewDay} readOnly={!editable} />
       </section>
 
       <HabitEditor open={editing !== null} habit={editing?.habit ?? null} preset={editing?.preset} onClose={() => setEditing(null)} />
@@ -135,7 +146,7 @@ export function TodayPage({ onNavigate }: { onNavigate: (tab: string) => void })
   );
 }
 
-function Todos({ day }: { day: DateKey }) {
+function Todos({ day, readOnly }: { day: DateKey; readOnly: boolean }) {
   const { state, dispatch } = useStore();
   const { launchSeed } = useFx();
   const [name, setName] = useState('');
@@ -157,6 +168,7 @@ function Todos({ day }: { day: DateKey }) {
   return (
     <section className="todos" aria-labelledby="todos-title">
       <h2 id="todos-title">To-dos</h2>
+      {!readOnly && (
       <form className="todo-add" onSubmit={add}>
         <label className="visually-hidden" htmlFor="todo-name">
           New to-do
@@ -175,9 +187,10 @@ function Todos({ day }: { day: DateKey }) {
           Add
         </button>
       </form>
+      )}
 
       {visible.length === 0 ? (
-        <p className="muted">No to-dos. Add anything you keep putting off.</p>
+        <p className="muted">{readOnly ? 'No to-dos finished this day.' : 'No to-dos. Add anything you keep putting off.'}</p>
       ) : (
         <ul className="habit-list">
           {visible.map((t) => (
@@ -186,6 +199,7 @@ function Todos({ day }: { day: DateKey }) {
                 type="button"
                 className="check"
                 aria-pressed={!!t.doneOn}
+                disabled={readOnly}
                 aria-label={`${t.name}${t.doneOn ? ', done' : ''}`}
                 onClick={(e) => {
                   if (!t.doneOn) launchSeed(e.currentTarget, t.area);
@@ -205,7 +219,7 @@ function Todos({ day }: { day: DateKey }) {
               </div>
               <div className="habit__side">
                 <span className="xp-chip">+{XP_BY_DIFFICULTY[t.difficulty]}</span>
-                <button type="button" className="icon-btn" onClick={() => dispatch({ type: 'deleteTodo', id: t.id })} aria-label={`Delete ${t.name}`}>
+                <button type="button" className="icon-btn" disabled={readOnly} onClick={() => dispatch({ type: 'deleteTodo', id: t.id })} aria-label={`Delete ${t.name}`}>
                   <Icon name="trash" size={14} />
                 </button>
               </div>

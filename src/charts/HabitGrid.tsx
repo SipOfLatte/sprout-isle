@@ -1,6 +1,8 @@
 import type { CellState, GridCell } from '../lib/analytics';
 import { formatShort, fromKey, WEEKDAY_LETTER, weekday } from '../lib/dates';
 import { AREA_LABEL, type Habit } from '../lib/types';
+import { openDay } from '../lib/nav';
+import { useStore } from '../state/store';
 import { ChartCard, EmptyChart, Legend, pct, truncate, useTooltip, useWidth } from './common';
 
 const STATE_LABEL: Record<CellState, string> = {
@@ -28,6 +30,7 @@ function fill(cell: GridCell): string | null {
 
 export function HabitGrid({ rows }: { rows: { habit: Habit; cells: GridCell[] }[] }) {
   const [ref, width] = useWidth<HTMLDivElement>();
+  const { today } = useStore();
   const { wrapRef, show, hide, node } = useTooltip();
 
   const cols = rows[0]?.cells.length ?? 0;
@@ -74,7 +77,7 @@ export function HabitGrid({ rows }: { rows: { habit: Habit; cells: GridCell[] }[
   return (
     <ChartCard
       title="Habit grid"
-      description="Every habit, every day. Darker means closer to the goal."
+      description="Every habit, every day. Darker means closer to the goal. Select a square to open that day."
       legend={
         <Legend
           items={[
@@ -119,7 +122,8 @@ export function HabitGrid({ rows }: { rows: { habit: Habit; cells: GridCell[] }[
                       return f ? (
                         <rect
                           key={c.day}
-                          className="cell"
+                          className="cell is-clickable"
+                          onClick={() => openDay(c.day, today)}
                           x={x}
                           y={y}
                           width={cell}
@@ -132,7 +136,8 @@ export function HabitGrid({ rows }: { rows: { habit: Habit; cells: GridCell[] }[
                       ) : (
                         <circle
                           key={c.day}
-                          className="cell cell--rest"
+                          className="cell cell--rest is-clickable"
+                          onClick={() => openDay(c.day, today)}
                           cx={x + cell / 2}
                           cy={y + cell / 2}
                           r={Math.max(1, cell / 10)}

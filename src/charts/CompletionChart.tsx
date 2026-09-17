@@ -2,6 +2,8 @@ import { scaleBand, scaleLinear } from 'd3-scale';
 import { line } from 'd3-shape';
 import type { DailyPoint } from '../lib/analytics';
 import { formatShort, fromKey, WEEKDAY_SHORT, weekday } from '../lib/dates';
+import { openDay } from '../lib/nav';
+import { useStore } from '../state/store';
 import { ChartCard, columnPath, EmptyChart, Legend, pct, useTooltip, useWidth } from './common';
 
 const HEIGHT = 200;
@@ -9,6 +11,7 @@ const M = { top: 12, right: 8, bottom: 26, left: 36 };
 
 export function CompletionChart({ points, avg, monthly }: { points: DailyPoint[]; avg: (number | null)[]; monthly: boolean }) {
   const [ref, width] = useWidth<HTMLDivElement>();
+  const { today } = useStore();
   const { wrapRef, show, hide, node } = useTooltip();
   const hasData = points.some((p) => p.score !== null);
 
@@ -58,7 +61,7 @@ export function CompletionChart({ points, avg, monthly }: { points: DailyPoint[]
   return (
     <ChartCard
       title="Daily completion"
-      description="Share of each day's scheduled habits finished, with partial credit for amounts."
+      description="Share of each day's scheduled habits finished, with partial credit for amounts. Select a day to open it."
       legend={
         <Legend
           items={[
@@ -93,7 +96,11 @@ export function CompletionChart({ points, avg, monthly }: { points: DailyPoint[]
                     {label(p.day, i)}
                   </text>
                   <rect
-                    className="hit"
+                    className={`hit${p.score !== null ? ' is-clickable' : ''}`}
+                    role={p.score !== null ? 'button' : undefined}
+                    aria-label={p.score !== null ? `Open ${formatShort(p.day)}` : undefined}
+                    onClick={() => p.score !== null && openDay(p.day, today)}
+                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), openDay(p.day, today))}
                     x={x(p.day)}
                     y={M.top}
                     width={x.step()}
@@ -104,6 +111,7 @@ export function CompletionChart({ points, avg, monthly }: { points: DailyPoint[]
                       show(e.currentTarget, formatShort(p.day), [
                         { value: pct(p.score), label: `score, ${p.done} of ${p.due} done`, key: 'var(--c-primary)' },
                         { value: pct(avg[i]), label: '7-day average', key: 'var(--c-trend)' },
+                        { value: 'Click', label: 'to open this day' },
                       ])
                     }
                     onFocus={(e) =>

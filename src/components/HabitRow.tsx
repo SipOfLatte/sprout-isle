@@ -6,7 +6,7 @@ import { useFx } from '../state/fx';
 import { useStore } from '../state/store';
 import { Icon } from './Icon';
 
-export function HabitRow({ habit, day, onEdit }: { habit: Habit; day: DateKey; onEdit: (h: Habit) => void }) {
+export function HabitRow({ habit, day, readOnly = false, onEdit }: { habit: Habit; day: DateKey; readOnly?: boolean; onEdit: (h: Habit) => void }) {
   const { state, dispatch, today } = useStore();
   const { launchSeed } = useFx();
   const checkRef = useRef<HTMLButtonElement>(null);
@@ -32,12 +32,13 @@ export function HabitRow({ habit, day, onEdit }: { habit: Habit; day: DateKey; o
     <li className={`habit habit--${habit.area}${done ? ' is-done' : ''}`}>
       {measured ? (
         <div className="stepper" role="group" aria-label={`${habit.name} amount`}>
-          <button type="button" className="stepper__btn" onClick={() => set(amount - 1)} disabled={amount === 0} aria-label={`Remove one ${habit.unit || 'unit'}`}>
+          <button type="button" className="stepper__btn" onClick={() => set(amount - 1)} disabled={readOnly || amount === 0} aria-label={`Remove one ${habit.unit || 'unit'}`}>
             <Icon name="minus" size={10} />
           </button>
           <button
             ref={checkRef}
             type="button"
+            disabled={readOnly}
             className="stepper__value"
             onClick={() => set(done ? 0 : habit.target)}
             aria-label={done ? `${habit.name}: goal reached, reset to 0` : `${habit.name}: mark goal of ${habit.target} reached`}
@@ -45,7 +46,7 @@ export function HabitRow({ habit, day, onEdit }: { habit: Habit; day: DateKey; o
             <span className="num">{amount}</span>
             <span className="of">/{habit.target}</span>
           </button>
-          <button type="button" className="stepper__btn" onClick={() => set(amount + 1)} aria-label={`Add one ${habit.unit || 'unit'}`}>
+          <button type="button" className="stepper__btn" disabled={readOnly} onClick={() => set(amount + 1)} aria-label={`Add one ${habit.unit || 'unit'}`}>
             <Icon name="plus" size={10} />
           </button>
         </div>
@@ -54,6 +55,7 @@ export function HabitRow({ habit, day, onEdit }: { habit: Habit; day: DateKey; o
           ref={checkRef}
           type="button"
           className="check"
+          disabled={readOnly}
           aria-pressed={done}
           aria-label={`${habit.name}${done ? ', done' : ''}`}
           onClick={() => set(done ? 0 : 1)}

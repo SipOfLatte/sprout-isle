@@ -18,6 +18,7 @@ own behaviour data.
 - Yes/no habits or amounts (for example 8 glasses of water), with partial progress.
 - Schedules: every day, chosen weekdays, or a number of times per week.
 - Add, edit, pause and delete habits at any time. Log up to 7 days back.
+- Browse any past day from the week strip or the calendar, or by selecting a day in a chart.
 - One-off to-dos that also earn XP.
 
 ### Game layer

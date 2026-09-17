@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.1.0 (2026-09-17)
+
+### Added
+- A week strip on Today: tap any day this week to open it, with a small bar showing how much of it got done.
+- A calendar for jumping to any past day, shaded by completion.
+- Selecting a day in the Daily completion, Habit grid or XP charts opens that day.
+- The viewed day is part of the URL, so reloading and the browser back button keep your place.
+- Past days show whether a streak freeze was used.
+
+### Changed
+- Days more than a week old open read-only, so streaks and XP can't be changed after the fact.
+- "X of Y done" counts a times-per-week habit only while its weekly quota is still open, or on days it was done.
+
 ## 2.0.0 (2026-09-17)
 
 ### Added
