@@ -14,7 +14,7 @@ type Point = { day: string; health: number; work: number; bonus: number };
 const SERIES = [
   { key: 'health', label: 'Health & body', color: 'var(--c-health)' },
   { key: 'work', label: 'Work & study', color: 'var(--c-work)' },
-  { key: 'bonus', label: 'Bonuses', color: 'var(--c-bonus)' },
+  { key: 'bonus', label: 'Bonuses and to-dos', color: 'var(--c-bonus)' },
 ] as const;
 
 function niceMax(v: number) {

@@ -88,9 +88,9 @@ export function sampleState(today: DateKey, days = 90): AppState {
     worldName: 'Sprout Isle',
     habits,
     todos: [
-      { id: newId(), name: 'Book dentist appointment', area: 'health', difficulty: 'easy', createdOn: addDays(today, -30), doneOn: addDays(today, -28) },
-      { id: newId(), name: 'Email tutor about project', area: 'work', difficulty: 'medium', createdOn: addDays(today, -12), doneOn: addDays(today, -11) },
-      { id: newId(), name: 'Update CV', area: 'work', difficulty: 'hard', createdOn: addDays(today, -3), doneOn: null },
+      { id: newId(), name: 'Book dentist appointment', area: null, difficulty: 'easy', createdOn: addDays(today, -30), doneOn: addDays(today, -28) },
+      { id: newId(), name: 'Email tutor about project', area: null, difficulty: 'medium', createdOn: addDays(today, -12), doneOn: addDays(today, -11) },
+      { id: newId(), name: 'Update CV', area: null, difficulty: 'hard', createdOn: addDays(today, -3), doneOn: null },
     ],
     rewards: [
       { id: newId(), name: 'An episode of my show', cost: 30 },

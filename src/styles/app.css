@@ -528,6 +528,10 @@ select {
   background: #86a8ec;
 }
 
+.seed--chore {
+  background: #ffb86b;
+}
+
 .sprout {
   animation: sprout 900ms steps(6, end) forwards;
 }
@@ -756,6 +760,10 @@ select {
   background: var(--c-work);
 }
 
+.habit--chore::before {
+  background: var(--line-strong);
+}
+
 .habit__body {
   display: grid;
   min-width: 0;
@@ -846,6 +854,11 @@ select {
 
 .habit--work .check[aria-pressed='true'] {
   background: var(--c-work);
+}
+
+/* Chores have no area colour, so a finished one gets a neutral slate fill that keeps the white tick visible in both themes. */
+.habit--chore .check[aria-pressed='true'] {
+  background: #6a6d8c;
 }
 
 .check[aria-pressed='true'] {
@@ -974,9 +987,10 @@ select {
   box-shadow: none;
 }
 
+/* Name on its own line on phones, then effort and Add side by side. One row on wider screens. */
 .todo-add {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
 }
 
@@ -984,17 +998,12 @@ select {
   grid-column: 1 / -1;
 }
 
-.todo-add .btn {
-  grid-column: 1 / -1;
-}
-
 @media (min-width: 640px) {
   .todo-add {
-    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
   }
 
-  .todo-add input,
-  .todo-add .btn {
+  .todo-add input {
     grid-column: auto;
   }
 }

@@ -50,7 +50,7 @@ export const stateSchema = z.object({
     )
     .max(MAX_HABITS),
   todos: z
-    .array(z.object({ id, name, area, difficulty, createdOn: dateKey, doneOn: dateKey.nullable() }))
+    .array(z.object({ id, name, area: area.nullable().default(null), difficulty, createdOn: dateKey, doneOn: dateKey.nullable() }))
     .max(5_000),
   rewards: z.array(z.object({ id, name, cost: z.number().int().min(1).max(100_000) })).max(200),
   redemptions: z

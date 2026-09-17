@@ -2,12 +2,11 @@
 // island, where it lands with a small sprout. Also hosts toasts.
 
 import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import type { Area } from '../lib/types';
-import { SEED_TARGET } from '../world/scene';
+import { SEED_TARGET, type SeedKind } from '../world/scene';
 
 interface Seed {
   id: number;
-  area: Area;
+  area: SeedKind;
   from: { x: number; y: number };
   to: { x: number; y: number };
 }
@@ -19,9 +18,9 @@ interface Toast {
 }
 
 interface Fx {
-  launchSeed: (from: HTMLElement, area: Area) => void;
+  launchSeed: (from: HTMLElement, area: SeedKind) => void;
   registerIsle: (svg: SVGSVGElement | null) => void;
-  landed: { area: Area; id: number } | null;
+  landed: { area: SeedKind; id: number } | null;
   toast: (title: string, body?: string) => void;
 }
 
@@ -42,7 +41,7 @@ export function FxProvider({ children }: { children: ReactNode }) {
     isleRef.current = svg;
   }, []);
 
-  const launchSeed = useCallback((from: HTMLElement, area: Area) => {
+  const launchSeed = useCallback((from: HTMLElement, area: SeedKind) => {
     const svg = isleRef.current;
     const id = nextId++;
     if (!svg || prefersReducedMotion()) {

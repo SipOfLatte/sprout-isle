@@ -26,7 +26,8 @@ export interface Habit {
 export interface Todo {
   id: string;
   name: string;
-  area: Area;
+  /** Only set on to-dos made before chores lost their category. New to-dos leave it null. */
+  area: Area | null;
   difficulty: Difficulty;
   createdOn: DateKey;
   doneOn: DateKey | null;

@@ -174,7 +174,8 @@ export function computeProgress(state: AppState, today: DateKey, extras: Extras 
     }
 
     for (const t of todosByDay.get(day) ?? []) {
-      xp[t.area] += XP_BY_DIFFICULTY[t.difficulty];
+      // Chores aren't tied to a part of life, so their XP grows your level but not the grove or town.
+      xp.bonus += XP_BY_DIFFICULTY[t.difficulty];
       p.todosDone++;
       active = true;
     }

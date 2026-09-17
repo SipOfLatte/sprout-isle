@@ -51,9 +51,12 @@ export const LANDMARKS: Landmark[] = [
 ];
 
 /** Where a seed lands for each area, in scene pixels. */
-export const SEED_TARGET: Record<Area, { x: number; y: number }> = {
+export type SeedKind = Area | 'chore';
+
+export const SEED_TARGET: Record<SeedKind, { x: number; y: number }> = {
   health: { x: 48, y: 50 },
   work: { x: 108, y: 50 },
+  chore: { x: 80, y: 52 },
 };
 
 type Grid = (string | null)[][];

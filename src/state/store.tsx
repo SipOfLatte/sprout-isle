@@ -9,7 +9,7 @@ import { ITEMS_BY_ID, SLOTS, slotAccepts } from '../lib/catalog';
 import { startOfWeek } from '../lib/dates';
 import { pruneQuests, questRewards, questsToGenerate } from '../lib/quests';
 import { loadState, newId, saveState } from '../lib/storage';
-import type { AppState, Area, Boss, Difficulty, Habit, Quest, Reward, Species } from '../lib/types';
+import type { AppState, Boss, Difficulty, Habit, Quest, Reward, Species } from '../lib/types';
 
 export type Action =
   | { type: 'setAmount'; habitId: string; day: DateKey; amount: number }
@@ -17,7 +17,7 @@ export type Action =
   | { type: 'archiveHabit'; id: string; day: DateKey }
   | { type: 'restoreHabit'; id: string }
   | { type: 'deleteHabit'; id: string }
-  | { type: 'addTodo'; name: string; area: Area; difficulty: Difficulty; day: DateKey }
+  | { type: 'addTodo'; name: string; difficulty: Difficulty; day: DateKey }
   | { type: 'toggleTodo'; id: string; day: DateKey }
   | { type: 'deleteTodo'; id: string }
   | { type: 'saveReward'; reward: Reward }
@@ -84,7 +84,7 @@ function apply(state: AppState, action: Exclude<Action, { type: 'replace' | 'set
         ...state,
         todos: [
           ...state.todos,
-          { id: newId(), name: action.name, area: action.area, difficulty: action.difficulty, createdOn: action.day, doneOn: null },
+          { id: newId(), name: action.name, area: null, difficulty: action.difficulty, createdOn: action.day, doneOn: null },
         ],
       };
     case 'toggleTodo':

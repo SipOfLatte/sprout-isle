@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { addDays } from './dates';
 import { computeProgress, dayTally, habitStreak, levelInfo, PERFECT_DAY_BONUS, COMEBACK_BONUS } from './engine';
+import { parseState } from './schema';
+import { emptyState } from './storage';
 import type { AppState, Habit } from './types';
 
 const T = '2026-09-17'; // a Thursday
@@ -97,5 +99,25 @@ describe('dayTally', () => {
     const s = state([daily, weekly], logs);
     expect(dayTally(s, '2026-09-14')).toEqual({ due: 2, done: 1 }); // weekly done Monday
     expect(dayTally(s, '2026-09-15')).toEqual({ due: 1, done: 1 }); // quota met, weekly drops out
+  });
+});
+
+describe('to-dos', () => {
+  it('count toward level and coins but not toward a part of life', () => {
+    const s: AppState = {
+      ...state([]),
+      todos: [{ id: 't1', name: 'Laundry', area: null, difficulty: 'medium', createdOn: T, doneOn: T }],
+    };
+    const p = computeProgress(s, T);
+    expect(p.totalXp).toBe(20);
+    expect(p.areaXp).toEqual({ health: 0, work: 0 });
+    expect(p.todosDone).toBe(1);
+  });
+
+  it('still loads older to-dos that were saved with a category', () => {
+    const old = { ...emptyState(), todos: [{ id: 't1', name: 'Old one', area: 'work', difficulty: 'easy', createdOn: T, doneOn: null }] };
+    const withoutArea = { ...emptyState(), todos: [{ id: 't2', name: 'New one', difficulty: 'easy', createdOn: T, doneOn: null }] };
+    expect(parseState(old)?.todos[0].area).toBe('work');
+    expect(parseState(withoutArea)?.todos[0].area).toBeNull();
   });
 });

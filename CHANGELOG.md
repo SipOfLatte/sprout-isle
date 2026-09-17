@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.5.0 (2026-09-18)
+
+### Changed
+- To-dos are now a simple list of chores. You give each one a name and an effort level, and it no longer asks for Health & body or Work & study.
+- XP from to-dos counts toward your level and coins but not toward the grove or town. The XP chart shows it with bonuses.
+- To-dos saved with a category before this change still load and work.
+
 ## 2.4.2 (2026-09-18)
 
 ### Changed

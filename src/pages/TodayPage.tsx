@@ -15,7 +15,7 @@ import { CalendarButton, WeekStrip } from '../components/DayBrowser';
 import { diffDays, formatLong, type DateKey } from '../lib/dates';
 import { openDay } from '../lib/nav';
 import { dayTally, isActiveOn, isDueOn } from '../lib/engine';
-import { AREA_LABEL, XP_BY_DIFFICULTY, type Area, type Difficulty, type Habit } from '../lib/types';
+import { XP_BY_DIFFICULTY, type Difficulty, type Habit } from '../lib/types';
 import { useFx } from '../state/fx';
 import { useStore } from '../state/store';
 
@@ -166,7 +166,6 @@ function Todos({ day, readOnly }: { day: DateKey; readOnly: boolean }) {
   const { state, dispatch } = useStore();
   const { launchSeed } = useFx();
   const [name, setName] = useState('');
-  const [area, setArea] = useState<Area>('work');
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -176,7 +175,7 @@ function Todos({ day, readOnly }: { day: DateKey; readOnly: boolean }) {
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) return;
-    dispatch({ type: 'addTodo', name: trimmed.slice(0, 80), area, difficulty, day });
+    dispatch({ type: 'addTodo', name: trimmed.slice(0, 80), difficulty, day });
     setName('');
     inputRef.current?.focus();
   };
@@ -189,11 +188,7 @@ function Todos({ day, readOnly }: { day: DateKey; readOnly: boolean }) {
         <label className="visually-hidden" htmlFor="todo-name">
           New to-do
         </label>
-        <input id="todo-name" ref={inputRef} value={name} onChange={(e) => setName(e.target.value)} maxLength={80} placeholder="Add a one-off task" />
-        <select value={area} onChange={(e) => setArea(e.target.value as Area)} aria-label="Part of life">
-          <option value="health">{AREA_LABEL.health}</option>
-          <option value="work">{AREA_LABEL.work}</option>
-        </select>
+        <input id="todo-name" ref={inputRef} value={name} onChange={(e) => setName(e.target.value)} maxLength={80} placeholder="Add a chore or one-off task" />
         <select value={difficulty} onChange={(e) => setDifficulty(e.target.value as Difficulty)} aria-label="Effort">
           <option value="easy">Easy +10</option>
           <option value="medium">Medium +20</option>
@@ -210,7 +205,7 @@ function Todos({ day, readOnly }: { day: DateKey; readOnly: boolean }) {
       ) : (
         <ul className="habit-list">
           {visible.map((t) => (
-            <li key={t.id} className={`habit habit--${t.area}${t.doneOn ? ' is-done' : ''}`}>
+            <li key={t.id} className={`habit habit--chore${t.doneOn ? ' is-done' : ''}`}>
               <button
                 type="button"
                 className="check"
@@ -218,7 +213,7 @@ function Todos({ day, readOnly }: { day: DateKey; readOnly: boolean }) {
                 disabled={readOnly}
                 aria-label={`${t.name}${t.doneOn ? ', done' : ''}`}
                 onClick={(e) => {
-                  if (!t.doneOn) launchSeed(e.currentTarget, t.area);
+                  if (!t.doneOn) launchSeed(e.currentTarget, 'chore');
                   dispatch({ type: 'toggleTodo', id: t.id, day });
                 }}
               >
@@ -226,12 +221,6 @@ function Todos({ day, readOnly }: { day: DateKey; readOnly: boolean }) {
               </button>
               <div className="habit__body">
                 <span className="habit__name">{t.name}</span>
-                <span className="habit__meta">
-                  <span className="area-tag">
-                    <Icon name={t.area === 'health' ? 'leaf' : 'book'} size={11} />
-                    {AREA_LABEL[t.area]}
-                  </span>
-                </span>
               </div>
               <div className="habit__side">
                 <span className="xp-chip">+{XP_BY_DIFFICULTY[t.difficulty]}</span>

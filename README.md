@@ -12,7 +12,7 @@ To look around without tracking anything yourself, open the You tab and choose L
 
 ### Tracking
 
-A habit can be yes or no, or an amount like 8 glasses of water. It can repeat every day, on chosen weekdays, or a set number of times a week, and you can edit, pause or delete it whenever you like. One-off to-dos earn XP as well.
+A habit can be yes or no, or an amount like 8 glasses of water. It can repeat every day, on chosen weekdays, or a set number of times a week, and you can edit, pause or delete it whenever you like. There's also a to-do list for chores and one-off tasks, which earn XP by effort without belonging to a part of life.
 
 The week strip and calendar on Today open any past day. You can still tick things off for the last seven days. Older days are read-only so streaks stay honest.
 
