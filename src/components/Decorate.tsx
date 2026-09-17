@@ -1,3 +1,6 @@
+// Placing owned items into island spots, plus renaming the companion. Placement goes through the
+// reducer, which checks the item fits the spot.
+
 import type { FormEvent } from 'react';
 import { ITEMS_BY_ID, SLOTS, slotAccepts, SPECIES } from '../lib/catalog';
 import { formatShort } from '../lib/dates';
@@ -7,6 +10,7 @@ import { ITEM_ART, PET_ART } from '../world/art';
 import { PixelSprite } from './PixelSprite';
 
 /** Numbered markers over the full island view (viewBox 12 18 136 68). */
+/** Positions are percentages of the island frame, so the markers line up at any screen size. */
 export function SlotMarkers() {
   const { state } = useStore();
   return (

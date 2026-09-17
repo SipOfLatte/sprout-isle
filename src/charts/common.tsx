@@ -1,3 +1,5 @@
+// Shared chart pieces: responsive width, tooltips, legends, the card with its table toggle, and bar shapes.
+
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 
 export const pct = (v: number | null | undefined) => (v === null || v === undefined ? 'n/a' : `${Math.round(v * 100)}%`);
@@ -32,6 +34,7 @@ export interface TipState {
 }
 
 /** One tooltip per chart; positions are relative to the chart wrapper. */
+/** Positions one tooltip per chart relative to its wrapper, and flips it near the edges so it stays on screen. */
 export function useTooltip() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [tip, setTip] = useState<TipState | null>(null);
@@ -82,6 +85,7 @@ export function Legend({ items }: { items: { label: string; color: string; shape
   );
 }
 
+/** Card around every chart, with a toggle to show the same data as a table. */
 export function ChartCard({
   title,
   description,

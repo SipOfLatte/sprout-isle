@@ -1,3 +1,5 @@
+// Daily completion columns with a 7-day rolling average line. Selecting a column opens that day.
+
 import { scaleBand, scaleLinear } from 'd3-scale';
 import { line } from 'd3-shape';
 import type { DailyPoint } from '../lib/analytics';

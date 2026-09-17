@@ -1,3 +1,5 @@
+// This week's three quests with progress bars. Quests are generated in the store; this only displays them.
+
 import { addDays, diffDays, startOfWeek } from '../lib/dates';
 import { evaluateQuest } from '../lib/quests';
 import { useStore } from '../state/store';
@@ -11,6 +13,7 @@ export function QuestBoard() {
 
   if (quests.length === 0) return null;
 
+  // Progress is worked out from the logs each render, so unticking a habit takes quest progress back down.
   const statuses = quests.map((q) => evaluateQuest(state, q, weekStart, today));
   const done = statuses.filter((s) => s.doneOn).length;
 

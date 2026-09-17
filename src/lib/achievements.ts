@@ -1,3 +1,6 @@
+// Achievements are checked against derived progress every render, so nothing about
+// them is stored. Unlocking one is just a measure crossing its goal.
+
 import { AREA_LEVEL_BASE, levelInfo, type Progress } from './engine';
 import type { AppState } from './types';
 

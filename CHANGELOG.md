@@ -1,54 +1,60 @@
 # Changelog
 
+## 2.3.1 (2026-09-17)
+
+### Changed
+- Rewrote the README, sync guide and this changelog in plainer language.
+- Added comments to every source file explaining what it does, plus notes on the less obvious logic.
+
 ## 2.3.0 (2026-09-17)
 
 ### Added
-- **Daily mood and energy check-in** on Today: two quick taps from 1 to 5, each optional. Checking in earns 5 XP and counts as showing up for your streak. Past days show what you logged.
-- Your companion responds to a low mood with comfort instead of cheerleading.
-- **Mood & energy view in Insights**, with its own address (`#insights/mood`):
-  - Average mood and energy compared with the same point last period, check-in days, and mood on perfect days vs others.
-  - Daily ratings with 7-day averages.
-  - What lines up with better mood or energy: the difference in average rating on days each habit was done vs skipped, same day and next day, with Welch 95% confidence intervals.
-  - Completion vs mood scatter plot with a least-squares line and Pearson's r.
-  - Mood or energy by weekday.
-- CSV export includes mood and energy columns.
-- Achievements: Checking in (7 days) and Know thyself (30 days).
-- Sample data includes check-ins where walks and deep work lift mood and going to bed on time lifts next-day energy, which the analysis recovers.
+- A daily mood and energy check-in on Today. It's two taps from 1 to 5 and either can be skipped. Checking in earns 5 XP and counts as showing up for your streak, and past days show what you logged.
+- Your companion comforts you on a low mood day instead of cheering.
+- A Mood & energy view in Insights, which has its own address (`#insights/mood`). It shows:
+  - average mood and energy against the same point last period, days checked in, and mood on perfect days vs other days
+  - daily ratings with 7-day averages
+  - how each habit lines up with your rating on the same day and the next, as a difference in averages with a Welch 95% confidence interval
+  - a completion vs mood scatter plot with a least-squares line and Pearson's r
+  - mood or energy by weekday
+- Mood and energy columns in the CSV export.
+- Two achievements: Checking in (7 days) and Know thyself (30 days).
+- Check-ins in the sample data. Walks and deep work lift mood there, and going to bed on time lifts the next day's energy, and the analysis picks both up.
 
 ## 2.2.0 (2026-09-17)
 
 ### Added
-- **Companion pet.** Hatch a sprout spirit, fox or frog. It grows through three stages as you finish habits, lives on your island, and greets you on the Today page. After a missed day it welcomes you back instead of pointing at the gap.
-- **Weekly boss battles.** Six bosses (the Procrastination Slime, Doomscroll Wraith, Snooze Golem, Couch Kraken, Chaos Gremlin and Burnout Ember). HP is sized from your last four weeks; every finished habit deals damage by effort, and to-dos and perfect days hit too. A win pays 80 XP and a rare item the first time you beat each kind.
-- **Island store.** A Shop tab with 19 things to buy (buildings, decorations, sky items and pets), unlocked by level, alongside your real-life rewards.
-- **Decorating.** Place buildings and decorations on eight spots along a new front ledge and three spots in the sky, from the Island page. Store pets move in by themselves.
-- Four achievements: Giant slayer, Monster hunter, Decorator, A new friend.
+- A companion pet. You hatch a sprout spirit, fox or frog, and it grows through three stages as you finish habits. It lives on your island and greets you on Today. After a missed day it welcomes you back rather than pointing at the gap.
+- Weekly boss battles against six bosses: the Procrastination Slime, Doomscroll Wraith, Snooze Golem, Couch Kraken, Chaos Gremlin and Burnout Ember. HP is based on your last four weeks. Finished habits deal damage by effort, and to-dos and perfect days hit too. A win pays 80 XP, plus a rare item the first time you beat each boss.
+- An island store in a new Shop tab, with 19 buildings, decorations, sky items and pets that unlock as you level up. Your real-life rewards moved into the same tab.
+- Decorating from the Island page, with eight spots along a new front ledge and three in the sky. Pets you buy move in by themselves.
+- Four achievements: Giant slayer, Monster hunter, Decorator and A new friend.
 
 ### Changed
 - The island has a deeper meadow at the front to make room for decorations.
-- The Rewards tab is now Shop, with Island store and Real-life rewards sections.
+- The Rewards tab is now called Shop.
 
 ## 2.1.0 (2026-09-17)
 
 ### Added
-- A week strip on Today: tap any day this week to open it, with a small bar showing how much of it got done.
+- A week strip on Today. Tap any day this week to open it; a small bar under each day shows how much got done.
 - A calendar for jumping to any past day, shaded by completion.
 - Selecting a day in the Daily completion, Habit grid or XP charts opens that day.
-- The viewed day is part of the URL, so reloading and the browser back button keep your place.
-- Past days show whether a streak freeze was used.
+- The day you're viewing is part of the URL, so reloading and the back button keep your place.
+- Past days show when a streak freeze was used.
 
 ### Changed
-- Days more than a week old open read-only, so streaks and XP can't be changed after the fact.
-- "X of Y done" counts a times-per-week habit only while its weekly quota is still open, or on days it was done.
+- Days more than a week old are read-only, so streaks and XP can't be changed after the fact.
+- "X of Y done" counts a times-per-week habit only while its weekly quota is still open, or on a day it was done.
 
 ## 2.0.0 (2026-09-17)
 
 ### Added
-- Weekly quests: three per week, generated from the last four weeks of history, with progress on the Today page and bonus XP when completed.
+- Weekly quests. Three arrive each week, based on your last four weeks, and pay bonus XP when finished.
 - Two quest achievements.
-- Optional sync between devices through a secret GitHub Gist, with conflict detection and a choose-a-copy prompt.
-- Automatic test, build and deploy to GitHub Pages on every push to `main`.
-- Documentation: README with screenshots, sync guide, changelog, license.
+- Optional sync between devices through a secret GitHub Gist. When both sides have changed, the app asks which copy to keep.
+- Automatic tests, build and deploy to GitHub Pages on every push to `main`.
+- A README with screenshots, a sync guide, this changelog and a license.
 
 ### Changed
 - The island view is cropped tighter so the island fills the frame.
@@ -58,8 +64,8 @@
 ## 1.0.0 (2026-09-17)
 
 ### Added
-- Habits (yes/no or amounts; daily, chosen weekdays, or times per week) and one-off to-dos.
+- Habits that are yes/no or amounts, repeating daily, on chosen weekdays, or a number of times per week. One-off to-dos.
 - XP, levels, streaks with freezes, perfect-day and comeback bonuses, achievements and a rewards shop.
-- A pixel island that grows with Health & body and Work & study levels.
-- Insights with week and month views, six charts with table views, and CSV export.
-- Local storage with schema-validated JSON backup and restore, plus sample data.
+- A pixel island that grows with your Health & body and Work & study levels.
+- Insights with week and month views, six charts that each have a table view, and CSV export.
+- Local storage with JSON backup and restore checked against a schema, plus sample data.

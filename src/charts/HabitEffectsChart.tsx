@@ -1,3 +1,6 @@
+// For each habit, the difference in mood or energy between days it was done and skipped,
+// with 95% confidence intervals. Two panels: same day and next day.
+
 import { scaleLinear } from 'd3-scale';
 import type { MeanDifference } from '../lib/stats';
 import { LOOKBACK_DAYS, MIN_GROUP, type HabitEffect, type Measure } from '../lib/wellbeing';

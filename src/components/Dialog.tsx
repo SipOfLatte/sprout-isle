@@ -1,3 +1,6 @@
+// A thin wrapper around the native <dialog> element, which handles focus trapping
+// and the Escape key for free.
+
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Icon } from './Icon';
 

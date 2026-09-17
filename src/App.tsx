@@ -1,3 +1,5 @@
+// App shell: navigation, hash routing between tabs, and the toasts for level-ups, quests and achievements.
+
 import { useEffect, useRef, useState } from 'react';
 import { Icon, type IconName } from './components/Icon';
 import { unlockedIds, ACHIEVEMENTS } from './lib/achievements';
@@ -24,6 +26,7 @@ function readRoute() {
   return TABS.some((t) => t.id === id) ? { tab: id, param } : { tab: 'today', param: undefined };
 }
 
+/** Watches derived progress and shows a toast when something new is earned. */
 function useCelebrations() {
   const { state, progress } = useStore();
   const { toast } = useFx();
@@ -56,6 +59,7 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
+  // Switching tabs scrolls to the top and moves focus to the main region for keyboard and screen reader users.
   const go = (id: string) => {
     window.location.hash = id;
     setRoute(readRoute());

@@ -1,3 +1,5 @@
+// Shapes of everything the app stores. Anything derived (XP, streaks, levels) lives in engine.ts instead.
+
 import type { DateKey } from './dates';
 
 export type Area = 'health' | 'work';

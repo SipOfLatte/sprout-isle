@@ -1,3 +1,5 @@
+// This week's boss: sprite, HP bar, reward, and a short hit animation when a habit lands.
+
 import { useEffect, useRef, useState } from 'react';
 import { BOSS_XP, bossOutcomes, DAMAGE, evaluateBoss, REPEAT_BOSS_XP } from '../lib/bosses';
 import { BOSSES, ITEMS_BY_ID } from '../lib/catalog';
@@ -16,6 +18,7 @@ export function BossCard() {
   const status = boss ? evaluateBoss(state, weekStart, boss, today) : null;
 
   // A short shake and damage number when a habit lands a hit.
+  // Compare with the damage from the previous render to spot a new hit.
   const lastDamage = useRef<number | null>(null);
   const hitCount = useRef(0);
   const [hit, setHit] = useState<{ amount: number; id: number } | null>(null);

@@ -1,3 +1,5 @@
+// Horizontal bars of completion rate per habit, coloured by area.
+
 import { scaleLinear } from 'd3-scale';
 import type { HabitRate } from '../lib/analytics';
 import { AREA_LABEL } from '../lib/types';

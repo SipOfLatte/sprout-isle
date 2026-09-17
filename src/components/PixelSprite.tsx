@@ -1,3 +1,5 @@
+// Draws any sprite from the world/ bitmaps at a chosen size, for cards and menus outside the island scene.
+
 import { useMemo } from 'react';
 import { PIXEL, type Sprite } from '../world/sprites';
 

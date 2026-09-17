@@ -1,3 +1,5 @@
+// The Island tab: the full-size island, decorating tools and each area's landmark progress.
+
 import { useState } from 'react';
 import { Decorate, SlotMarkers } from '../components/Decorate';
 import { Icon } from '../components/Icon';

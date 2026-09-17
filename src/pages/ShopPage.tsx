@@ -1,3 +1,5 @@
+// The Shop tab: the island store, and the real-life rewards you define and redeem.
+
 import { useState, type FormEvent } from 'react';
 import { confirmAction } from '../components/Dialog';
 import { Icon } from '../components/Icon';

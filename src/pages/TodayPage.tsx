@@ -1,3 +1,6 @@
+// The Today tab: island and player bar, the day's habits, check-in, boss, quests and to-dos.
+// It can show any past day too; days older than a week are read-only.
+
 import { useRef, useState, type FormEvent } from 'react';
 import { HabitEditor, type HabitDraft } from '../components/HabitEditor';
 import { HabitRow } from '../components/HabitRow';
@@ -18,6 +21,7 @@ import { useStore } from '../state/store';
 
 const MAX_BACKFILL_DAYS = 7;
 
+/** Suggested habits for an empty list. Each opens the editor pre-filled, so nothing is added without a confirm. */
 const STARTERS: (HabitDraft & { name: string })[] = [
   { name: 'Walk 20 minutes', area: 'health', difficulty: 'easy', schedule: { kind: 'daily' } },
   { name: 'Drink water', area: 'health', difficulty: 'medium', schedule: { kind: 'daily' }, target: 8, unit: 'glasses' },
@@ -154,6 +158,7 @@ export function TodayPage({ dayParam, onNavigate }: { dayParam?: string; onNavig
   );
 }
 
+/** One-off tasks. Open to-dos appear on every day from when they were added; finished ones show only on the day they were done. */
 function Todos({ day, readOnly }: { day: DateKey; readOnly: boolean }) {
   const { state, dispatch } = useStore();
   const { launchSeed } = useFx();

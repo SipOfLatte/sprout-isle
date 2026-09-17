@@ -1,3 +1,5 @@
+// The daily mood and energy check-in. Tapping the selected option again clears it.
+
 import type { DateKey } from '../lib/dates';
 import { CHECKIN_BONUS } from '../lib/engine';
 import { ENERGY_LABELS, MOOD_LABELS } from '../lib/wellbeing';
@@ -25,6 +27,7 @@ function Face({ level }: { level: number }) {
   );
 }
 
+/** Energy shown as five rising bars with the first `level` filled. */
 function Bars({ level }: { level: number }) {
   return (
     <span className="energy-bars" aria-hidden="true">

@@ -1,3 +1,5 @@
+// The Insights tab: a Habits view and a Mood & energy view sharing one filter row.
+
 import { useMemo, useState } from 'react';
 import { CompletionChart } from '../charts/CompletionChart';
 import { CorrelationChart } from '../charts/CorrelationChart';
@@ -181,6 +183,7 @@ export function InsightsPage({ viewParam }: { viewParam?: string }) {
   );
 }
 
+/** The Mood & energy view. Stat tiles and the trend follow the period filter; the other charts look back 90 days. */
 function WellbeingView({
   period,
   prevSlice,
@@ -252,6 +255,7 @@ function WellbeingView({
   );
 }
 
+/** A stat tile. The delta compares against the same number of elapsed days in the previous period. */
 function Kpi({ label, value, delta, unit = '', kind, isCurrent }: { label: string; value: string; delta: number | null; unit?: string; kind: PeriodKind; isCurrent: boolean }) {
   return (
     <div className="kpi">

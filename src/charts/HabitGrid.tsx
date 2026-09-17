@@ -1,3 +1,5 @@
+// Habit by day heatmap. Partial amounts get lighter steps of the same colour as full completions.
+
 import type { CellState, GridCell } from '../lib/analytics';
 import { formatShort, fromKey, WEEKDAY_LETTER, weekday } from '../lib/dates';
 import { AREA_LABEL, type Habit } from '../lib/types';
@@ -36,6 +38,7 @@ export function HabitGrid({ rows }: { rows: { habit: Habit; cells: GridCell[] }[
   const cols = rows[0]?.cells.length ?? 0;
   const labelW = width < 480 ? 96 : 150;
   const gap = 2;
+  // Cells shrink to fit a month on narrow screens, down to 6px.
   const cell = Math.max(6, Math.min(26, Math.floor((width - labelW) / Math.max(cols, 1)) - gap));
   const top = 18;
   const height = top + rows.length * (cell + gap);

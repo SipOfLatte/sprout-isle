@@ -1,3 +1,6 @@
+// Runs Gist sync in the background: on open, a few seconds after edits, and when the tab is hidden.
+// It decides whether to push, pull or ask about a conflict (see decide.ts).
+
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { AppState } from '../lib/types';
 import { useStore } from '../state/store';
@@ -103,6 +106,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     [dispatch, setMeta],
   );
 
+  // One sync pass. `busy` stops overlapping runs when edits and timers fire close together.
   const run = useCallback(async () => {
     let m = metaRef.current;
     if (!m || busy.current) return;
@@ -147,6 +151,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     }
   }, [fail, pull, push, setMeta]);
 
+  // Check the token, then find the existing sync gist or create one from this device's data.
   const connect = useCallback(
     async (rawToken: string) => {
       const token = rawToken.trim();

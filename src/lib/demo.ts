@@ -1,3 +1,5 @@
+// Dev-only helper behind the ?demo URL flag. Production builds never load it.
+
 import { todayKey } from './dates';
 import { sampleState } from './sample';
 import { loadState, saveState } from './storage';

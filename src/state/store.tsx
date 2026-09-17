@@ -1,3 +1,6 @@
+// App state lives in one reducer. Stored data goes in, and derived progress (XP, streaks,
+// boss results, owned items) is recomputed from it with useMemo.
+
 import { createContext, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from 'react';
 import { todayKey, type DateKey } from '../lib/dates';
 import { computeProgress, type Progress } from '../lib/engine';
@@ -67,6 +70,7 @@ function apply(state: AppState, action: Exclude<Action, { type: 'replace' | 'set
       return { ...state, habits: state.habits.map((h) => (h.id === action.id ? { ...h, archivedOn: action.day } : h)) };
     case 'restoreHabit':
       return { ...state, habits: state.habits.map((h) => (h.id === action.id ? { ...h, archivedOn: null } : h)) };
+    // Deleting also removes the habit's history. Pausing (archiveHabit) is the non-destructive option.
     case 'deleteHabit': {
       const logs: AppState['logs'] = {};
       for (const [day, entries] of Object.entries(state.logs)) {
@@ -130,6 +134,7 @@ function apply(state: AppState, action: Exclude<Action, { type: 'replace' | 'set
       const placements = Object.fromEntries(Object.entries(state.placements).filter(([, id]) => id !== item.id));
       return { ...state, placements: { ...placements, [slot.id]: item.id } };
     }
+    // Ratings are clamped to 1 to 5. Passing null clears one, and clearing both removes the day's entry.
     case 'checkIn': {
       const current = state.checkins[action.day] ?? { mood: null, energy: null };
       const valid = (v: number | null | undefined, fallback: number | null) =>
@@ -157,6 +162,7 @@ interface Store {
   owned: Set<string>;
 }
 
+/** Trims a pet name, falling back to the species' default name if it ends up empty. */
 function cleanName(name: string, species: Species): string {
   const trimmed = name.trim().slice(0, 20);
   return trimmed || { sprout: 'Sprig', fox: 'Maple', frog: 'Lily' }[species];
@@ -164,6 +170,8 @@ function cleanName(name: string, species: Species): string {
 
 const StoreContext = createContext<Store | null>(null);
 
+/** Today's date key. It rechecks every minute and when the tab becomes visible, so leaving the
+ *  app open past midnight rolls over to the new day. */
 function useToday(): DateKey {
   const [today, setToday] = useState(todayKey);
   useEffect(() => {
@@ -183,10 +191,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const today = useToday();
   const [saveFailed, setSaveFailed] = useState(false);
 
+  // Save after every change. If the browser blocks storage, the app shows a warning.
   useEffect(() => {
     setSaveFailed(!saveState(state));
   }, [state]);
 
+  // Generate this week's quests and boss the first time the week is seen.
   useEffect(() => {
     const pending = questsToGenerate(state, today);
     if (pending) dispatch({ type: 'setQuests', ...pending });

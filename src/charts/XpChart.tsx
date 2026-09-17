@@ -1,3 +1,5 @@
+// Stacked columns of XP per day, split into Health, Work and bonuses.
+
 import { scaleBand, scaleLinear } from 'd3-scale';
 import { formatShort, fromKey, WEEKDAY_SHORT, weekday } from '../lib/dates';
 import { openDay } from '../lib/nav';

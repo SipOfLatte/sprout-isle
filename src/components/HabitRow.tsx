@@ -1,3 +1,5 @@
+// One habit on the Today list: a checkbox, or a stepper for habits measured in amounts.
+
 import { useRef } from 'react';
 import type { DateKey } from '../lib/dates';
 import { amountOn, habitStreak, isDone, scheduleLabel, weekCompletions } from '../lib/engine';
@@ -13,11 +15,13 @@ export function HabitRow({ habit, day, readOnly = false, onEdit }: { habit: Habi
 
   const amount = amountOn(state, habit.id, day);
   const done = isDone(habit, amount);
+  // When viewing a past day, the streak shown is the one that day had.
   const streak = habitStreak(state, habit, day === today ? today : day);
   const measured = habit.target > 1;
   const s = habit.schedule;
   const weekCount = s.kind === 'weekly' ? weekCompletions(state, habit, day) : 0;
 
+  // Clamped so a stray tap can't log absurd amounts. The seed only flies when this tap completes the goal.
   const set = (next: number) => {
     const clamped = Math.max(0, Math.min(habit.target * 10, next));
     const willBeDone = clamped >= habit.target;

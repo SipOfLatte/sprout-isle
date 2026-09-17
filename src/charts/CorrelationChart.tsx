@@ -1,3 +1,5 @@
+// Lower-triangle matrix of phi correlations between habits, on a diverging colour scale.
+
 import { MIN_CORRELATION_SAMPLES, type CorrelationResult } from '../lib/analytics';
 import { ChartCard, EmptyChart, truncate, useTooltip, useWidth } from './common';
 
@@ -12,6 +14,7 @@ function color(r: number): string {
 /** One decimal, without a misleading "-0.0". */
 const fmt1 = (v: number) => (Math.abs(v) < 0.05 ? '0.0' : v.toFixed(1));
 
+/** Rough verbal label for a correlation, used in tooltips. */
 function strength(r: number) {
   const a = Math.abs(r);
   if (a < 0.1) return 'no real link';

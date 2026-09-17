@@ -1,3 +1,5 @@
+// Average mood or energy for each weekday over the last 12 weeks.
+
 import { scaleBand, scaleLinear } from 'd3-scale';
 import { WEEKDAY_SHORT } from '../lib/dates';
 import type { Measure } from '../lib/wellbeing';

@@ -1,3 +1,5 @@
+// Create and edit habits: name, area, how it's measured, schedule and effort.
+
 import { useState, type FormEvent } from 'react';
 import { WEEKDAY_SHORT } from '../lib/dates';
 import { newId } from '../lib/storage';
@@ -41,6 +43,7 @@ function HabitForm({ habit, preset, onClose }: { habit: Habit | null; preset?: H
   const [difficulty, setDifficulty] = useState<Difficulty>(init.difficulty ?? 'medium');
   const [error, setError] = useState<string | null>(null);
 
+  // Validation runs here instead of with native form checks, so the messages match the app's wording.
   const submit = (e: FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim();

@@ -1,3 +1,5 @@
+// The Island store section of the Shop tab: filterable item cards with buy buttons.
+
 import { useState } from 'react';
 import { BOSSES, CATALOG, type CatalogItem, type ItemKind } from '../lib/catalog';
 import { levelInfo } from '../lib/engine';
@@ -29,6 +31,7 @@ export function IslandStore({ onNavigate }: { onNavigate: (tab: string) => void 
     return (a.price ?? 0) - (b.price ?? 0);
   });
 
+  // The reducer also refuses loot and duplicates; this check covers the coin balance.
   const buy = (item: CatalogItem) => {
     if (item.price === null || progress.coins < item.price || owned.has(item.id)) return;
     dispatch({ type: 'buy', itemId: item.id, day: today });

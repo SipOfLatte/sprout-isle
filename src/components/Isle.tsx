@@ -1,3 +1,5 @@
+// Renders the island scene as SVG. The scene is rebuilt only when levels, sky phase or decorations change.
+
 import { useEffect, useMemo, useState } from 'react';
 import { ITEMS_BY_ID, SLOTS } from '../lib/catalog';
 import { AREA_LEVEL_BASE, levelInfo } from '../lib/engine';
@@ -31,6 +33,7 @@ export function Isle({ variant = 'full', register = false }: { variant?: 'full' 
     Object.entries(state.placements).filter(([slot, item]) => owned.has(item) && SLOTS.some((s) => s.id === slot)),
   );
   const storePets = [...owned].filter((id) => ITEMS_BY_ID.get(id)?.kind === 'pet');
+  // A cheap cache key for the decorations, so the scene isn't rebuilt on unrelated renders.
   const decoKey = JSON.stringify([placements, companion?.species, stage, storePets]);
 
   const rects = useMemo(
@@ -42,6 +45,7 @@ export function Isle({ variant = 'full', register = false }: { variant?: 'full' 
     [levels.health, levels.work, phase, decoKey], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
+  // The banner crops to the island's top half; the full view trims empty sky around the edges.
   const viewBox = variant === 'banner' ? `0 20 ${W} 58` : `12 18 136 68`;
   const target = landed ? SEED_TARGET[landed.area] : null;
 

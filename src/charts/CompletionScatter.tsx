@@ -1,3 +1,5 @@
+// One dot per day: share of habits completed against that day's mood or energy, with a least-squares line.
+
 import { scaleLinear } from 'd3-scale';
 import { formatShort } from '../lib/dates';
 import { openDay } from '../lib/nav';

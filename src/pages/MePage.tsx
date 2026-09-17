@@ -1,3 +1,5 @@
+// The You tab: stats, achievements, paused habits, sync, and backup, import and reset tools.
+
 import { useRef, useState, type ChangeEvent } from 'react';
 import { confirmAction } from '../components/Dialog';
 import { Icon } from '../components/Icon';
@@ -25,6 +27,7 @@ export function MePage() {
 
   const exportJson = () => downloadText(`sprout-isle-backup-${today}.json`, JSON.stringify(state, null, 2), 'application/json');
 
+  // Imports go through the same schema as stored data and ask before replacing anything.
   const importJson = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';

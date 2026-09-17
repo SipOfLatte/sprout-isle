@@ -1,3 +1,5 @@
+// Level, XP bar, streak, coins and freezes, shown under the island on Today.
+
 import { levelInfo, MAX_FREEZES } from '../lib/engine';
 import { useStore } from '../state/store';
 import { Icon } from './Icon';

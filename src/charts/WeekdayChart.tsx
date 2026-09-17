@@ -1,3 +1,5 @@
+// Average habit score by weekday over the last 12 weeks. The best day is highlighted and the rest are muted.
+
 import { scaleBand, scaleLinear } from 'd3-scale';
 import type { WeekdayPoint } from '../lib/analytics';
 import { WEEKDAY_SHORT } from '../lib/dates';

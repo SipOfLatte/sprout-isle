@@ -1,3 +1,5 @@
+// The companion card on Today, or the egg-hatching choice for players who don't have one yet.
+
 import { useState, type FormEvent } from 'react';
 import { SPECIES } from '../lib/catalog';
 import { bond, petLine, petMood, STAGE_AT, STAGE_NAMES, stageFor } from '../lib/pets';

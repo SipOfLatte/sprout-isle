@@ -1,3 +1,5 @@
+// Daily mood and energy dots with 7-day average lines, on one 1 to 5 axis.
+
 import { scaleLinear, scalePoint } from 'd3-scale';
 import { line } from 'd3-shape';
 import { formatShort, fromKey, WEEKDAY_SHORT, weekday } from '../lib/dates';

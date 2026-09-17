@@ -1,132 +1,111 @@
 # Sprout Isle
 
-**A habit tracker where every habit you keep grows a small pixel island.**
+A habit tracker where the habits you keep grow a small pixel island. Health habits grow a grove and work and study habits build a town. Along the way you raise a companion pet, fight a boss each week, and get an Insights tab that looks at your habits next to a daily mood and energy check-in.
 
-Health habits grow a grove, and work and study habits build a town. Missing a day
-never takes anything away. Streak freezes and comeback bonuses make it easy to get
-going again. Behind the game is a proper analytics page built for looking at your
-own behaviour data.
+Live app: https://sipoflatte.github.io/sprout-isle/
 
-**Live app:** https://sipoflatte.github.io/sprout-isle/
-(open the **You** tab and choose **Load sample data** to explore with 90 days of history)
+To look around without tracking anything yourself, open the You tab and choose Load sample data. It fills in 90 days of made-up history.
 
-![Today view with the island, level, quests and today's habits](docs/screenshots/today.png)
+![Today view with the island, level, boss, quests and today's habits](docs/screenshots/today.png)
 
-## Features
+## What it does
 
 ### Tracking
-- Yes/no habits or amounts (for example 8 glasses of water), with partial progress.
-- Schedules: every day, chosen weekdays, or a number of times per week.
-- Add, edit, pause and delete habits at any time. Log up to 7 days back.
-- Browse any past day from the week strip or the calendar, or by selecting a day in a chart.
-- One-off to-dos that also earn XP.
 
-### Game layer
-- XP by effort, levels, and a daily streak with freezes (one earned every 7 days, up to 2).
-- Perfect-day and comeback bonuses.
-- **Weekly quests:** three quests each Monday, sized from your last four weeks.
-  The first always targets the habit that has been slipping most.
-- **Companion pet:** hatch a sprout spirit, fox or frog that grows through three stages as you finish habits
-  and greets you each day. After a missed day it welcomes you back rather than pointing at the gap.
-- **Weekly boss battles:** six bosses with HP sized from your recent weeks. Every finished habit deals
-  damage by effort, so a partial week still counts. Wins pay XP and rare island items.
-- A floating island with 16 landmarks unlocked by area level, and a sky that follows the time of day.
-- **Shop:** spend coins on buildings, decorations, sky items and pets, then place them on the island.
-  Real-life rewards you define yourself live in the same tab.
-- Achievements.
+A habit can be yes or no, or an amount like 8 glasses of water. It can repeat every day, on chosen weekdays, or a set number of times a week, and you can edit, pause or delete it whenever you like. One-off to-dos earn XP as well.
 
-![Island store in the Shop tab](docs/screenshots/shop.png)
+The week strip and calendar on Today open any past day. You can still tick things off for the last seven days. Older days are read-only so streaks stay honest.
+
+Once a day you can rate your mood and energy from 1 to 5. Both are optional, and checking in counts as showing up for your streak.
+
+### The game side
+
+Finishing habits earns XP and coins. Missing a day doesn't cost you anything. Every seven days in a row earns a streak freeze (you can hold two), and coming back after a gap pays a comeback bonus.
+
+Each Monday brings three quests sized from your last four weeks, plus a boss whose HP is set by how much you usually get done. Habits hit it for 1, 2 or 3 damage depending on effort, so a week with a couple of bad days can still end in a win. The first time you beat each boss it drops an island item you can't buy.
+
+Your companion hatches from an egg as a sprout spirit, a fox or a frog, and grows through three stages as you finish habits. It greets you on Today. After a missed day or a low mood check-in it says something kind instead of cheering you on.
+
+Coins buy buildings, decorations, sky items and pets in the Shop, and you place them on the island from the Island tab. The Shop also holds real-life rewards you set yourself, like an episode of a show.
+
+![The island store](docs/screenshots/shop.png)
 
 ### Insights
-Week and month views with a single filter row (period, area) that scopes everything:
+
+Every chart has tooltips and a table view. Export CSV writes one row per habit per day, with that day's mood and energy, ready for pandas.
+
+The Habits view follows a week or month filter.
 
 | Chart | What it shows |
 |---|---|
 | Stat tiles | Completion, XP, perfect days and habits completed, compared with the same point last period |
-| Daily completion | Column per day with a 7-day rolling mean |
-| Habit grid | Habit × day heatmap on a sequential scale |
-| By habit | Completion rate per habit, sorted |
-| XP earned | Stacked columns by area plus bonuses |
-| Weekly rhythm | Mean score per weekday over 12 weeks, best day highlighted |
-| Habits that move together | Phi-coefficient matrix between habits over 60 days |
+| Daily completion | A column per day with a 7-day rolling mean |
+| Habit grid | Every habit on every day, shaded by how close you got to the goal |
+| By habit | Completion rate per habit, best first |
+| XP earned | XP per day split by area, with bonuses on top |
+| Weekly rhythm | Average score for each weekday over 12 weeks |
+| Habits that move together | Phi correlation between each pair of habits over 60 days |
 
-Every chart has hover and keyboard tooltips and a **Show table** view.
-**Export CSV** produces a tidy long-format file (one row per habit per day) ready for pandas.
+![Insights, habits view](docs/screenshots/insights.png)
 
-![Insights page](docs/screenshots/insights.png)
-
-### Mood & energy
-A daily check-in (mood and energy, 1 to 5) feeds a second Insights view:
+The Mood & energy view uses the daily check-ins.
 
 | Chart | What it shows |
 |---|---|
-| Stat tiles | Average mood and energy vs the same point last period, check-in days, mood on perfect days vs others |
+| Stat tiles | Average mood and energy against the same point last period, days checked in, and mood on perfect days vs other days |
 | Mood and energy | Daily ratings with 7-day averages |
-| What lines up with better mood | Difference in average rating on days each habit was done vs skipped, same day and next day, with 95% confidence intervals |
-| Completion vs mood | One dot per day, least-squares line and Pearson's r |
-| Mood by weekday | Average rating per weekday over 12 weeks |
+| What lines up with better mood | How much higher or lower your rating is on days you did each habit, on the same day and the next, with 95% confidence intervals |
+| Completion vs mood | One dot per day, with a least-squares line and Pearson's r |
+| Mood by weekday | Average rating for each weekday over 12 weeks |
 
-![Mood and energy insights](docs/screenshots/mood-insights.png)
+![Insights, mood and energy view](docs/screenshots/mood-insights.png)
 
 <p>
   <img src="docs/screenshots/mobile-today.png" alt="Today view on a phone" width="300">
-  <img src="docs/screenshots/island.png" alt="Island page" width="520">
+  <img src="docs/screenshots/island.png" alt="The Island tab with placed decorations" width="520">
 </p>
 
-### Sync (optional)
-Sync between devices through a secret GitHub Gist in your own account, using a
-token that can only access gists. See [docs/SYNC.md](docs/SYNC.md).
+### Sync
+
+Sync is optional. It keeps devices in step through a secret gist in your own GitHub account, using a token that can only touch gists. Setup steps and the privacy trade-offs are in [docs/SYNC.md](docs/SYNC.md).
 
 ## How the data works
 
-Only raw inputs are stored: habit definitions, `logs[date][habitId] = amount`,
-to-dos, rewards and the quests generated each week. Everything else (XP, levels,
-streaks, quest progress, every chart) is computed from those inputs by pure,
-unit-tested functions. Editing a past day therefore updates everything
-consistently, with no stored totals to drift out of step.
+The app stores only what you enter: habits, the amount logged each day, to-dos, check-ins, purchases and where you placed things, plus the quests and boss picked at the start of each week. XP, levels, streaks, quest progress, boss damage and all the charts are worked out from those records every time they're needed. If you edit a past day, everything that depends on it updates, and there are no running totals to fall out of step.
 
-| Module | Responsibility |
+| Module | What's in it |
 |---|---|
-| [`src/lib/engine.ts`](src/lib/engine.ts) | Scheduling, XP, levels, streaks, freezes, bonuses |
-| [`src/lib/analytics.ts`](src/lib/analytics.ts) | Period windows, completion scores, rolling mean, weekday profile, correlations, tidy export |
-| [`src/lib/quests.ts`](src/lib/quests.ts) | Weekly quest generation and evaluation |
+| [`src/lib/engine.ts`](src/lib/engine.ts) | Scheduling, XP, levels, streaks, freezes and bonuses |
+| [`src/lib/analytics.ts`](src/lib/analytics.ts) | Period windows, completion scores, rolling means, weekday profiles, correlations and the CSV rows |
 | [`src/lib/wellbeing.ts`](src/lib/wellbeing.ts) | Mood and energy trends, habit effects, completion vs rating |
-| [`src/lib/stats.ts`](src/lib/stats.ts) | Welch confidence intervals, Student's t quantiles, least-squares fit |
-| [`src/lib/bosses.ts`](src/lib/bosses.ts) | Boss HP sizing, damage, wins and loot |
+| [`src/lib/stats.ts`](src/lib/stats.ts) | Welch confidence intervals, Student's t values and the least-squares fit |
+| [`src/lib/quests.ts`](src/lib/quests.ts) | Picking and scoring weekly quests |
+| [`src/lib/bosses.ts`](src/lib/bosses.ts) | Boss HP, damage, wins and loot |
 | [`src/lib/pets.ts`](src/lib/pets.ts) | Companion growth and mood |
-| [`src/lib/catalog.ts`](src/lib/catalog.ts) | Store items, boss info and island placement spots |
-| [`src/lib/schema.ts`](src/lib/schema.ts) | zod schema for anything read from storage, backups or sync |
-| [`src/sync/`](src/sync) | Gist client and sync conflict logic |
-| [`src/world/`](src/world) | Pixel sprites and island scene builder |
+| [`src/lib/catalog.ts`](src/lib/catalog.ts) | Store items, boss details and the spots on the island |
+| [`src/lib/schema.ts`](src/lib/schema.ts) | The zod schema that anything loaded from storage, a backup or a gist has to pass |
+| [`src/sync/`](src/sync) | The gist client and the logic that decides whether to upload, download or ask |
+| [`src/world/`](src/world) | Pixel sprites and the island scene builder |
 
-### Method notes
-- **Completion score** gives partial credit: `min(amount / target, 1)`.
-- **Weekly quotas** are scaled to the part of a week inside the period being viewed,
-  so month edges aren't penalised.
-- **Period comparisons** use the same number of elapsed days in the previous period.
-- **Correlation** is Pearson's r on binary completion over days both habits were due,
-  which for two binary series is the phi coefficient. Pairs need at least 14 shared
-  days and some variation, otherwise they show as n/a.
-- **Habit effects** compare mean rating on days a habit was done against days it was due but skipped,
-  over the last 90 days, using Welch's t interval (unequal variances). Each group needs at least 5 days.
-  The next-day version pairs each day's habit with the following day's rating. The interval is checked
-  against `scipy.stats.ttest_ind(equal_var=False)` in the tests. These are associations, not causes.
-- **Boss HP** is 85% of your average weekly damage over the last four weeks (easy habits hit for 1,
-  medium 2, hard 3, to-dos 1, perfect days 2), or 60% of this week's scheduled damage for new players.
-- **Quest targets** use the last four weeks: habit quests aim for the recent rate
-  plus 20 percentage points, area quests for the recent score plus 10.
-- **Chart colours** were checked for colour-vision deficiency separation and contrast
-  in both light and dark themes.
+## Methods
 
-## Security and privacy
+Completion gives partial credit: a day's score for a habit is `min(amount / target, 1)`, so five glasses out of eight scores 0.625. When a times-per-week habit is viewed over a week or month, its quota is scaled to the days that fall inside the period, which stops a month that starts on a Thursday from counting against you. Comparisons with the previous period use the same number of days into it.
 
-- Data stays in your browser unless you turn on sync.
-- Stored data, imported backups and synced data are validated against a schema with size limits before use.
-- CSV exports defuse values that spreadsheets would run as formulas.
-- Production builds ship a strict Content Security Policy that only allows connections to the GitHub API.
-- The sync token is stored separately from app data, is never included in backups, and is only sent to `api.github.com`.
+The correlation between two habits is Pearson's r on done or not done, taken over days both were due. For two yes/no series that's the phi coefficient. A pair needs 14 shared days with some variation before it's shown.
 
-## Run locally
+For mood and energy, each habit's effect is the average rating on days you did it minus the average on days it was due and you skipped it, over the last 90 days. The interval is a Welch 95% confidence interval, which doesn't assume the two groups have equal variance, and each group needs at least five days. The next-day version pairs each day's habit with the following day's rating. The tests check these intervals against `scipy.stats.ttest_ind(equal_var=False)`. None of this shows cause. A stressful week can drag down both your habits and your mood without one causing the other.
+
+Quest targets come from the last four weeks. Habit quests aim 20 percentage points above your recent completion rate, and area quests 10 points above your recent score. Boss HP is 85% of your average weekly damage over the same four weeks, and new players start at 60% of what their schedule allows.
+
+The sample data has patterns built in on purpose. Walks and deep work lift that day's mood, and getting to bed on time lifts the next day's energy. One of the tests checks that the analysis finds them.
+
+Chart colours were checked for colour-blind separation and contrast in both the light and dark themes.
+
+## Privacy and security
+
+Your data stays in your browser unless you turn on sync. Anything the app reads from storage, a backup file or a gist is checked against a schema with size limits first. CSV exports escape cells that a spreadsheet would otherwise run as formulas. Production builds set a Content Security Policy that only allows network requests to the GitHub API. The sync token is stored apart from your data, so it never ends up in a backup.
+
+## Running it locally
 
 ```bash
 npm install
@@ -135,14 +114,11 @@ npm test
 npm run build
 ```
 
-Pushing to `main` runs the tests, builds, and deploys to GitHub Pages through
-[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
+Every push to `main` runs the tests, builds the site and deploys it to GitHub Pages using [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
 
-## Stack
+## Built with
 
-React 19, TypeScript, Vite, d3-scale and d3-shape for chart geometry, zod for
-validation, Vitest for tests. Fonts are Pixelify Sans and Atkinson Hyperlegible,
-self-hosted.
+React 19 and TypeScript on Vite. The charts are hand-built SVG using d3-scale and d3-shape, validation uses zod, and the tests run on Vitest. Fonts are Pixelify Sans and Atkinson Hyperlegible, served with the app.
 
 ## License
 

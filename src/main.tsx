@@ -1,3 +1,6 @@
+// App entry point: fonts, stylesheets and the providers every page depends on.
+// The order matters. Sync reads the store, and the app reads both.
+
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@fontsource/pixelify-sans/500.css';

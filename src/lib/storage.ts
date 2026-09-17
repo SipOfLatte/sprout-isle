@@ -1,8 +1,11 @@
+// Loads and saves app state in localStorage and creates the starting state for new players.
+
 import { parseState } from './schema';
 import type { AppState } from './types';
 
 const KEY = 'sprout-isle/state/v1';
 
+/** Random UUIDs, so ids can't be guessed or collide across synced devices. */
 export function newId(): string {
   return crypto.randomUUID();
 }
@@ -50,6 +53,7 @@ export function loadState(): AppState {
   }
 }
 
+/** Returns false when the browser refuses to store (private mode, quota full). */
 export function saveState(state: AppState): boolean {
   try {
     localStorage.setItem(KEY, JSON.stringify(state));
