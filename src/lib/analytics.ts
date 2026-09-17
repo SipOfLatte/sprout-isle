@@ -327,6 +327,9 @@ export interface TidyRow {
   score: number;
   completed: boolean;
   days_since_created: number;
+  /** That day's check-in, blank when not logged. */
+  mood: number | '';
+  energy: number | '';
 }
 
 /** One row per habit per day it was due or logged: ready for pandas. */
@@ -350,6 +353,8 @@ export function tidyRows(state: AppState, today: DateKey): TidyRow[] {
         score: Number(score(h, amount).toFixed(3)),
         completed: isDone(h, amount),
         days_since_created: diffDays(h.createdOn, day),
+        mood: state.checkins[day]?.mood ?? '',
+        energy: state.checkins[day]?.energy ?? '',
       });
     }
   }

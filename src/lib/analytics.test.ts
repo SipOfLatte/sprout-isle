@@ -21,7 +21,7 @@ const base = (h: Partial<Habit>): Habit => ({
 });
 
 const state = (habits: Habit[], logs: AppState['logs']): AppState => ({
-  version: 1, worldName: 'x', habits, todos: [], rewards: [], redemptions: [], logs, quests: {}, bosses: {}, companion: null, purchases: [], placements: {}, isSample: false, updatedAt: 0,
+  version: 1, worldName: 'x', habits, todos: [], rewards: [], redemptions: [], logs, quests: {}, bosses: {}, companion: null, purchases: [], placements: {}, checkins: {}, isSample: false, updatedAt: 0,
 });
 
 describe('periods', () => {
@@ -69,6 +69,8 @@ describe('export', () => {
   it('produces tidy rows and defuses spreadsheet formulas', () => {
     const rows = tidyRows(sampleState(T), T);
     expect(rows.length).toBeGreaterThan(300);
+    expect(rows.some((r) => typeof r.mood === 'number')).toBe(true);
+    expect(Object.keys(rows[0])).toEqual(expect.arrayContaining(['mood', 'energy']));
     expect(toCsv([{ habit: '=HYPERLINK("x")' }])).toBe('habit\n"\'=HYPERLINK(""x"")"');
   });
 });

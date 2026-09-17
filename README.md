@@ -55,6 +55,19 @@ Every chart has hover and keyboard tooltips and a **Show table** view.
 
 ![Insights page](docs/screenshots/insights.png)
 
+### Mood & energy
+A daily check-in (mood and energy, 1 to 5) feeds a second Insights view:
+
+| Chart | What it shows |
+|---|---|
+| Stat tiles | Average mood and energy vs the same point last period, check-in days, mood on perfect days vs others |
+| Mood and energy | Daily ratings with 7-day averages |
+| What lines up with better mood | Difference in average rating on days each habit was done vs skipped, same day and next day, with 95% confidence intervals |
+| Completion vs mood | One dot per day, least-squares line and Pearson's r |
+| Mood by weekday | Average rating per weekday over 12 weeks |
+
+![Mood and energy insights](docs/screenshots/mood-insights.png)
+
 <p>
   <img src="docs/screenshots/mobile-today.png" alt="Today view on a phone" width="300">
   <img src="docs/screenshots/island.png" alt="Island page" width="520">
@@ -77,6 +90,8 @@ consistently, with no stored totals to drift out of step.
 | [`src/lib/engine.ts`](src/lib/engine.ts) | Scheduling, XP, levels, streaks, freezes, bonuses |
 | [`src/lib/analytics.ts`](src/lib/analytics.ts) | Period windows, completion scores, rolling mean, weekday profile, correlations, tidy export |
 | [`src/lib/quests.ts`](src/lib/quests.ts) | Weekly quest generation and evaluation |
+| [`src/lib/wellbeing.ts`](src/lib/wellbeing.ts) | Mood and energy trends, habit effects, completion vs rating |
+| [`src/lib/stats.ts`](src/lib/stats.ts) | Welch confidence intervals, Student's t quantiles, least-squares fit |
 | [`src/lib/bosses.ts`](src/lib/bosses.ts) | Boss HP sizing, damage, wins and loot |
 | [`src/lib/pets.ts`](src/lib/pets.ts) | Companion growth and mood |
 | [`src/lib/catalog.ts`](src/lib/catalog.ts) | Store items, boss info and island placement spots |
@@ -92,6 +107,10 @@ consistently, with no stored totals to drift out of step.
 - **Correlation** is Pearson's r on binary completion over days both habits were due,
   which for two binary series is the phi coefficient. Pairs need at least 14 shared
   days and some variation, otherwise they show as n/a.
+- **Habit effects** compare mean rating on days a habit was done against days it was due but skipped,
+  over the last 90 days, using Welch's t interval (unequal variances). Each group needs at least 5 days.
+  The next-day version pairs each day's habit with the following day's rating. The interval is checked
+  against `scipy.stats.ttest_ind(equal_var=False)` in the tests. These are associations, not causes.
 - **Boss HP** is 85% of your average weekly damage over the last four weeks (easy habits hit for 1,
   medium 2, hard 3, to-dos 1, perfect days 2), or 60% of this week's scheduled damage for new players.
 - **Quest targets** use the last four weeks: habit quests aim for the recent rate

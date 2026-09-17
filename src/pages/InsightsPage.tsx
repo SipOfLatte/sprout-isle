@@ -22,27 +22,41 @@ import {
   type PeriodKind,
 } from '../lib/analytics';
 import { toCsv, downloadText } from '../lib/csv';
-import { addDays, diffDays, minKey } from '../lib/dates';
+import { addDays, diffDays, minKey, type DateKey } from '../lib/dates';
+import { mean } from '../lib/stats';
+import { completionVsRating, habitEffects, LOOKBACK_DAYS, weekdayRatings, wellbeingSeries, wellbeingSummary, type Measure } from '../lib/wellbeing';
+import { CompletionScatter } from '../charts/CompletionScatter';
+import { HabitEffectsChart } from '../charts/HabitEffectsChart';
+import { MoodTrendChart } from '../charts/MoodTrendChart';
+import { WeekdayRatingChart } from '../charts/WeekdayRatingChart';
 import { useStore } from '../state/store';
 
 const RHYTHM_WEEKS = 12;
 const CORRELATION_DAYS = 60;
 
-export function InsightsPage() {
+export function InsightsPage({ viewParam }: { viewParam?: string }) {
   const { state, progress, today } = useStore();
   const [kind, setKind] = useState<PeriodKind>('week');
   const [anchor, setAnchor] = useState(today);
   const [area, setArea] = useState<AreaFilter>('all');
+  const [view, setViewState] = useState<'habits' | 'wellbeing'>(viewParam === 'mood' ? 'wellbeing' : 'habits');
+  const setView = (v: 'habits' | 'wellbeing') => {
+    setViewState(v);
+    // Keep the view in the address so it can be bookmarked, without adding history entries.
+    history.replaceState(null, '', `#insights${v === 'wellbeing' ? '/mood' : ''}`);
+  };
+  const [measure, setMeasure] = useState<Measure>('mood');
 
   const period = periodFor(kind, anchor);
   const isCurrent = period.start <= today && today <= period.end;
   const monthly = kind === 'month';
 
+  // Compare like with like: if we're 3 days into this week, compare to the first 3 days of last week.
+  const prev = shiftPeriod(period, -1);
+  const elapsed = diffDays(period.start, minKey(period.end, today));
+  const prevSlice = { start: prev.start, end: minKey(prev.end, addDays(prev.start, elapsed)) };
+
   const data = useMemo(() => {
-    // Compare like with like: if we're 3 days into this week, compare to the first 3 days of last week.
-    const prev = shiftPeriod(period, -1);
-    const elapsed = diffDays(period.start, minKey(period.end, today));
-    const prevSlice = { start: prev.start, end: minKey(prev.end, addDays(prev.start, elapsed)) };
     // Pull 6 extra days so the first rolling-average point has a full window.
     const extended = dailySeries(state, addDays(period.start, -6), period.end, today, area);
     const avg = rollingMean(extended.map((p) => p.score), 7).slice(6);
@@ -82,6 +96,15 @@ export function InsightsPage() {
         </button>
       </header>
 
+      <div className="segmented insight-tabs" role="tablist" aria-label="Insight views">
+        <button type="button" role="tab" aria-selected={view === 'habits'} onClick={() => setView('habits')}>
+          Habits
+        </button>
+        <button type="button" role="tab" aria-selected={view === 'wellbeing'} onClick={() => setView('wellbeing')}>
+          Mood & energy
+        </button>
+      </div>
+
       <div className="filters" role="group" aria-label="Filters">
         <div className="segmented" role="radiogroup" aria-label="Period length">
           {(['week', 'month'] as const).map((k) => (
@@ -117,9 +140,20 @@ export function InsightsPage() {
             </button>
           ))}
         </div>
+        {view === 'wellbeing' && (
+          <div className="segmented" role="radiogroup" aria-label="Measure">
+            {(['mood', 'energy'] as const).map((m) => (
+              <button key={m} type="button" role="radio" aria-checked={measure === m} onClick={() => setMeasure(m)}>
+                {m === 'mood' ? 'Mood' : 'Energy'}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {state.habits.length === 0 ? (
+      {view === 'wellbeing' ? (
+        <WellbeingView period={period} prevSlice={prevSlice} area={area} measure={measure} kind={kind} isCurrent={isCurrent} />
+      ) : state.habits.length === 0 ? (
         <p className="empty">Your charts appear once you've tracked a habit or two. Want to explore first? Load sample data from the Me tab.</p>
       ) : (
         <>
@@ -144,6 +178,77 @@ export function InsightsPage() {
         </>
       )}
     </div>
+  );
+}
+
+function WellbeingView({
+  period,
+  prevSlice,
+  area,
+  measure,
+  kind,
+  isCurrent,
+}: {
+  period: { start: DateKey; end: DateKey };
+  prevSlice: { start: DateKey; end: DateKey };
+  area: AreaFilter;
+  measure: Measure;
+  kind: PeriodKind;
+  isCurrent: boolean;
+}) {
+  const { state, today } = useStore();
+
+  const data = useMemo(
+    () => ({
+      now: wellbeingSummary(state, period.start, period.end, today),
+      before: wellbeingSummary(state, prevSlice.start, prevSlice.end, today),
+      series: wellbeingSeries(state, period.start, period.end, today),
+      effects: habitEffects(state, today, measure, area),
+      scatter: completionVsRating(state, today, measure, area),
+      weekdays: weekdayRatings(state, today, measure),
+    }),
+    [state, today, period.start, period.end, prevSlice.start, prevSlice.end, measure, area],
+  );
+
+  if (Object.keys(state.checkins).length === 0) {
+    return (
+      <p className="empty">
+        Check in with your mood and energy on the Today page. After a week or two, this shows your trends and which habits line up with your better days.
+      </p>
+    );
+  }
+
+  const { now, before, weekdays } = data;
+  // Last 90 days: days where every scheduled habit was finished vs the rest.
+  const perfect = data.scatter.points.filter((p) => p.score === 1).map((p) => p.rating);
+  const others = data.scatter.points.filter((p) => p.score < 1).map((p) => p.rating);
+  const oneDp = (a: number | null, b: number | null) => (a === null || b === null ? null : Math.round((a - b) * 10) / 10);
+
+  return (
+    <>
+      <div className="kpis">
+        <Kpi label="Average mood" value={now.mood === null ? 'n/a' : `${now.mood.toFixed(1)} / 5`} delta={oneDp(now.mood, before.mood)} kind={kind} isCurrent={isCurrent} />
+        <Kpi label="Average energy" value={now.energy === null ? 'n/a' : `${now.energy.toFixed(1)} / 5`} delta={oneDp(now.energy, before.energy)} kind={kind} isCurrent={isCurrent} />
+        <Kpi label="Days checked in" value={`${now.checkedIn} of ${now.days}`} delta={null} kind={kind} isCurrent={isCurrent} />
+        <Kpi
+          label={`${measure === 'mood' ? 'Mood' : 'Energy'}: perfect days vs others`}
+          value={perfect.length && others.length ? `${mean(perfect)!.toFixed(1)} vs ${mean(others)!.toFixed(1)}` : 'n/a'}
+          delta={null}
+          kind={kind}
+          isCurrent={isCurrent}
+        />
+      </div>
+
+      <div className="chart-grid">
+        <MoodTrendChart points={data.series} monthly={kind === 'month'} />
+        <HabitEffectsChart effects={data.effects} measure={measure} />
+        <CompletionScatter points={data.scatter.points} fit={data.scatter.fit} measure={measure} />
+        <WeekdayRatingChart points={weekdays} measure={measure} />
+      </div>
+      <p className="footnote">
+        Habit effects and the scatter plot look back {LOOKBACK_DAYS} days from today, and the weekday chart 12 weeks, so they don't change with the period filter.
+      </p>
+    </>
   );
 }
 

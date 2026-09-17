@@ -79,6 +79,14 @@ export interface Purchase {
   on: DateKey;
 }
 
+/** A daily check-in. Either rating can be left blank. */
+export interface CheckIn {
+  /** 1 (low) to 5 (great). */
+  mood: number | null;
+  /** 1 (drained) to 5 (energised). */
+  energy: number | null;
+}
+
 /** logs[date][habitId] = amount logged that day. */
 export type Logs = Record<DateKey, Record<string, number>>;
 
@@ -98,6 +106,7 @@ export interface AppState {
   purchases: Purchase[];
   /** placements[slotId] = itemId placed on the island. */
   placements: Record<string, string>;
+  checkins: Record<DateKey, CheckIn>;
   isSample: boolean;
   /** Epoch ms of the last local change; drives sync conflict detection. */
   updatedAt: number;

@@ -7,6 +7,7 @@ import { PlayerBar } from '../components/PlayerBar';
 import { QuestBoard } from '../components/QuestBoard';
 import { BossCard } from '../components/BossCard';
 import { CompanionCorner } from '../components/Companion';
+import { CheckInCard } from '../components/CheckInCard';
 import { WeekStrip } from '../components/DayBrowser';
 import { diffDays, formatLong, type DateKey } from '../lib/dates';
 import { openDay } from '../lib/nav';
@@ -84,6 +85,8 @@ export function TodayPage({ dayParam, onNavigate }: { dayParam?: string; onNavig
         <WeekStrip day={viewDay} onSelect={setDay} />
 
         {isToday && <CompanionCorner />}
+
+        <CheckInCard day={viewDay} readOnly={!editable} />
 
         {!editable && (
           <p className="notice notice--quiet">

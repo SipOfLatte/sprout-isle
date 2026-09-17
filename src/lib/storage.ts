@@ -25,6 +25,7 @@ export function emptyState(): AppState {
     companion: null,
     purchases: [],
     placements: {},
+    checkins: {},
     isSample: false,
     updatedAt: 0,
   };

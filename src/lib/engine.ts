@@ -12,6 +12,8 @@ export const COMEBACK_GAP_DAYS = 3;
 export const FREEZE_EVERY = 7;
 export const MAX_FREEZES = 2;
 export const XP_PER_COIN = 5;
+/** A small thank-you for checking in, which also counts as showing up. */
+export const CHECKIN_BONUS = 5;
 
 export function isActiveOn(habit: Habit, day: DateKey): boolean {
   return habit.createdOn <= day && (habit.archivedOn === null || day < habit.archivedOn);
@@ -93,6 +95,8 @@ export interface Progress {
   todosDone: number;
   questsDone: number;
   bossesDefeated: number;
+  /** Days with a mood or energy check-in. */
+  checkInsLogged: number;
 }
 
 /** Bonus XP earned from quests and bosses, keyed by the day it was earned. */
@@ -107,6 +111,7 @@ export function firstDay(state: AppState, today: DateKey): DateKey {
     ...state.habits.map((h) => h.createdOn),
     ...state.todos.map((t) => t.doneOn ?? t.createdOn),
     ...Object.keys(state.logs),
+    ...Object.keys(state.checkins),
   ];
   return minKey(...keys);
 }
@@ -130,6 +135,7 @@ export function computeProgress(state: AppState, today: DateKey, extras: Extras 
     todosDone: 0,
     questsDone: 0,
     bossesDefeated: 0,
+    checkInsLogged: 0,
   };
 
   const todosByDay = new Map<DateKey, typeof state.todos>();
@@ -170,6 +176,13 @@ export function computeProgress(state: AppState, today: DateKey, extras: Extras 
     for (const t of todosByDay.get(day) ?? []) {
       xp[t.area] += XP_BY_DIFFICULTY[t.difficulty];
       p.todosDone++;
+      active = true;
+    }
+
+    const checkIn = state.checkins[day];
+    if (checkIn && (checkIn.mood !== null || checkIn.energy !== null)) {
+      xp.bonus += CHECKIN_BONUS;
+      p.checkInsLogged++;
       active = true;
     }
 

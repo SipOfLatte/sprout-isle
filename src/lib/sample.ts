@@ -43,9 +43,18 @@ export function sampleState(today: DateKey, days = 90): AppState {
   const habits = [walk, water, gym, sleep, deep, study, plan];
   const logs: AppState['logs'] = {};
   const roughWeek = [addDays(start, 38), addDays(start, 43)];
+  // Moods use their own generator so habit history stays the same as before.
+  const moodRand = mulberry32(4242);
+  const checkins: AppState['checkins'] = {};
+  const rating = (v: number) => Math.max(1, Math.min(5, Math.round(v)));
+  let sleptLastNight = false;
 
   for (const [i, day] of range(start, today).entries()) {
-    if (day >= roughWeek[0] && day <= roughWeek[1]) continue;
+    if (day >= roughWeek[0] && day <= roughWeek[1]) {
+      if (moodRand() < 0.4) checkins[day] = { mood: rating(1.6 + moodRand()), energy: rating(1.5 + moodRand()) };
+      sleptLastNight = false;
+      continue;
+    }
     const trend = (i / days) * 0.22;
     const wd = weekday(day);
     const weekend = wd >= 5;
@@ -63,6 +72,15 @@ export function sampleState(today: DateKey, days = 90): AppState {
 
     for (const k of Object.keys(log)) if (log[k] === 0) delete log[k];
     if (Object.keys(log).length) logs[day] = log;
+
+    // Mood lifts with walks and deep work; energy mostly follows last night's sleep.
+    if (moodRand() < 0.85) {
+      const noise = () => (moodRand() - 0.5) * 1.6;
+      const mood = 2.6 + (log[walk.id] ? 0.6 : 0) + (log[deep.id] ? 0.45 : 0) + (log[gym.id] ? 0.3 : 0) + trend * 2 + noise();
+      const energy = 2.4 + (sleptLastNight ? 0.9 : 0) + (log[gym.id] ? 0.25 : 0) - (weekend ? 0.2 : 0) + trend * 1.5 + noise();
+      checkins[day] = { mood: rating(mood), energy: moodRand() < 0.92 ? rating(energy) : null };
+    }
+    sleptLastNight = slept;
   }
 
   return {
@@ -91,6 +109,7 @@ export function sampleState(today: DateKey, days = 90): AppState {
       { id: newId(), itemId: 'chick', cost: 60, on: addDays(today, -12) },
       { id: newId(), itemId: 'campfire', cost: 45, on: addDays(today, -6) },
     ],
+    checkins,
     placements: { 'ground-2': 'well', 'ground-4': 'flower-bed', 'ground-7': 'campfire', 'sky-1': 'kite' },
     isSample: true,
     updatedAt: Date.now(),

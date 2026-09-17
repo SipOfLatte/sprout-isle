@@ -97,7 +97,7 @@ export default function App() {
         )}
         {tab === 'today' && <TodayPage dayParam={route.param} onNavigate={go} />}
         {tab === 'world' && <WorldPage />}
-        {tab === 'insights' && <InsightsPage />}
+        {tab === 'insights' && <InsightsPage viewParam={route.param} />}
         {tab === 'shop' && <ShopPage onNavigate={go} />}
         {tab === 'me' && <MePage />}
       </main>

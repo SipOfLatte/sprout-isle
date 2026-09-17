@@ -29,6 +29,8 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'boss-5', name: 'Monster hunter', description: 'Defeat 5 weekly bosses', measure: (p) => p.bossesDefeated, goal: 5 },
   { id: 'decorator', name: 'Decorator', description: 'Place 4 items on your island', measure: (_, s) => Object.keys(s.placements).length, goal: 4 },
   { id: 'friend', name: 'A new friend', description: 'Hatch your companion', measure: (_, s) => (s.companion ? 1 : 0), goal: 1 },
+  { id: 'checkin-7', name: 'Checking in', description: 'Log your mood or energy on 7 days', measure: (p) => p.checkInsLogged, goal: 7 },
+  { id: 'checkin-30', name: 'Know thyself', description: 'Log your mood or energy on 30 days', measure: (p) => p.checkInsLogged, goal: 30 },
   { id: 'treat', name: 'Earned it', description: 'Redeem your first reward', measure: (_, s) => s.redemptions.length, goal: 1 },
 ];
 

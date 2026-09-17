@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.3.0 (2026-09-17)
+
+### Added
+- **Daily mood and energy check-in** on Today: two quick taps from 1 to 5, each optional. Checking in earns 5 XP and counts as showing up for your streak. Past days show what you logged.
+- Your companion responds to a low mood with comfort instead of cheerleading.
+- **Mood & energy view in Insights**, with its own address (`#insights/mood`):
+  - Average mood and energy compared with the same point last period, check-in days, and mood on perfect days vs others.
+  - Daily ratings with 7-day averages.
+  - What lines up with better mood or energy: the difference in average rating on days each habit was done vs skipped, same day and next day, with Welch 95% confidence intervals.
+  - Completion vs mood scatter plot with a least-squares line and Pearson's r.
+  - Mood or energy by weekday.
+- CSV export includes mood and energy columns.
+- Achievements: Checking in (7 days) and Know thyself (30 days).
+- Sample data includes check-ins where walks and deep work lift mood and going to bed on time lifts next-day energy, which the analysis recovers.
+
 ## 2.2.0 (2026-09-17)
 
 ### Added

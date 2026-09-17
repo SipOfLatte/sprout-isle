@@ -26,10 +26,14 @@ export function stageFor(bondPoints: number): { stage: number; next: number | nu
   return { stage, next: STAGE_AT[stage + 1] ?? null };
 }
 
-export type PetMood = 'curious' | 'happy' | 'proud' | 'overjoyed' | 'waiting' | 'missing';
+export type PetMood = 'curious' | 'happy' | 'proud' | 'overjoyed' | 'waiting' | 'missing' | 'gentle';
 
 function activeOn(state: AppState, day: DateKey): boolean {
-  return Object.values(state.logs[day] ?? {}).some((v) => v > 0) || state.todos.some((t) => t.doneOn === day);
+  return (
+    Object.values(state.logs[day] ?? {}).some((v) => v > 0) ||
+    state.todos.some((t) => t.doneOn === day) ||
+    Boolean(state.checkins[day])
+  );
 }
 
 export function petMood(state: AppState, today: DateKey): PetMood {
@@ -44,8 +48,12 @@ export function petMood(state: AppState, today: DateKey): PetMood {
 
   if (activeOn(state, today)) {
     const { due, done } = dayTally(state, today);
+    const allDone = due > 0 && done === due;
+    // A low check-in gets comfort before cheerleading, unless the day went fully right.
+    const mood = state.checkins[today]?.mood;
+    if (mood !== null && mood !== undefined && mood <= 2 && !allDone) return 'gentle';
     if (gap !== null && gap >= 2) return 'overjoyed';
-    if (due > 0 && done === due) return 'proud';
+    if (allDone) return 'proud';
     return 'happy';
   }
   if (gap === null) return 'curious';
@@ -76,6 +84,11 @@ const LINES: Record<PetMood, string[]> = {
     'Nice! Every tick grows the island a little.',
     'That one landed. The boss definitely felt it.',
     'Look at you go. What’s next?',
+  ],
+  gentle: [
+    "Rough one? Thanks for telling me. The smallest habit still counts today.",
+    "Low days happen. Be kind to yourself; one easy thing is plenty.",
+    "I'm right here. Rest counts too.",
   ],
   proud: [
     'Everything done today. I’m so proud of you.',

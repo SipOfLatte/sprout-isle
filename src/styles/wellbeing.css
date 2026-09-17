@@ -1,0 +1,159 @@
+/* Mood and energy check-in, and the wellbeing insights. */
+
+.checkin {
+  margin: 16px 2px 0;
+  padding: 14px 16px;
+  display: grid;
+  gap: 12px;
+  background: var(--surface);
+  box-shadow:
+    0 -2px 0 var(--line),
+    0 2px 0 var(--line),
+    -2px 0 0 var(--line),
+    2px 0 0 var(--line);
+}
+
+.checkin__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+.checkin__hint {
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+}
+
+.checkin__row {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.checkin__label {
+  font-weight: 700;
+  font-size: var(--fs-sm);
+}
+
+.checkin__options {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.checkin__option {
+  display: grid;
+  justify-items: center;
+  align-content: end;
+  gap: 4px;
+  min-height: 60px;
+  padding: 6px 2px;
+  border: 0;
+  cursor: pointer;
+  color: var(--ink-3);
+  background: var(--surface-2);
+}
+
+.checkin__option:hover:not(:disabled) {
+  color: var(--ink);
+  box-shadow: inset 0 0 0 2px var(--line-strong);
+}
+
+.checkin__option:disabled {
+  cursor: default;
+}
+
+.checkin__option.is-selected {
+  box-shadow: inset 0 0 0 3px var(--ink);
+  color: var(--ink);
+}
+
+.checkin__option--mood.is-selected {
+  background: color-mix(in srgb, var(--c-mood) 22%, var(--surface));
+}
+
+.checkin__option--mood.is-selected svg {
+  color: var(--c-mood);
+}
+
+.checkin__option--energy.is-selected {
+  background: color-mix(in srgb, var(--c-energy) 22%, var(--surface));
+}
+
+.checkin__text {
+  font-size: var(--fs-xs);
+  line-height: 1.2;
+}
+
+.energy-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 22px;
+}
+
+.energy-bars span {
+  width: 4px;
+  background: var(--c-track);
+}
+
+.energy-bars span.on {
+  background: currentColor;
+}
+
+.checkin__option--energy.is-selected .energy-bars span.on {
+  background: var(--c-energy);
+}
+
+@media (max-width: 420px) {
+  .checkin__row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .checkin__text {
+    font-size: 0.6875rem;
+  }
+}
+
+/* ---- Insights: wellbeing view ------------------------------------------ */
+
+.insight-tabs {
+  margin-bottom: 16px;
+}
+
+.effect-note {
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+  max-width: 70ch;
+}
+
+.chart .ci {
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.chart .zero-line {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.chart .dot-ring {
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+
+.chart .facet-title {
+  fill: var(--ink-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.chart .fit-line {
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-dasharray: none;
+}

@@ -24,6 +24,8 @@
   --c-work: #4f7fd9;
   --c-bonus: #c7651a;
   --c-primary: #6a5fc1;
+  --c-mood: #6a5fc1;
+  --c-energy: #c7651a;
   --c-trend: #2b2d52;
   --c-muted-mark: #c3c6dc;
   --c-track: #e3e8f0;
@@ -78,6 +80,8 @@
     --c-work: #5b87dc;
     --c-bonus: #d07c28;
     --c-primary: #8a80de;
+    --c-mood: #8a80de;
+    --c-energy: #d07c28;
     --c-trend: #eef0ff;
     --c-muted-mark: #4a507e;
     --c-track: #343a64;

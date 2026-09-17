@@ -28,6 +28,7 @@ export type Action =
   | { type: 'buy'; itemId: string; day: DateKey }
   | { type: 'place'; slotId: string; itemId: string }
   | { type: 'unplace'; slotId: string }
+  | { type: 'checkIn'; day: DateKey; mood?: number | null; energy?: number | null }
   /** `fromSync` keeps the incoming timestamp so a pulled copy isn't seen as a new local edit. */
   | { type: 'replace'; state: AppState; fromSync?: boolean };
 
@@ -128,6 +129,16 @@ function apply(state: AppState, action: Exclude<Action, { type: 'replace' | 'set
       // An item lives in one slot at a time, so placing it again moves it.
       const placements = Object.fromEntries(Object.entries(state.placements).filter(([, id]) => id !== item.id));
       return { ...state, placements: { ...placements, [slot.id]: item.id } };
+    }
+    case 'checkIn': {
+      const current = state.checkins[action.day] ?? { mood: null, energy: null };
+      const valid = (v: number | null | undefined, fallback: number | null) =>
+        v === undefined ? fallback : v === null ? null : Math.min(5, Math.max(1, Math.round(v)));
+      const next = { mood: valid(action.mood, current.mood), energy: valid(action.energy, current.energy) };
+      const checkins = { ...state.checkins };
+      if (next.mood === null && next.energy === null) delete checkins[action.day];
+      else checkins[action.day] = next;
+      return { ...state, checkins };
     }
     case 'unplace': {
       const placements = { ...state.placements };

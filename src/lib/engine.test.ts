@@ -6,7 +6,7 @@ import type { AppState, Habit } from './types';
 const T = '2026-09-17'; // a Thursday
 
 function state(habits: Habit[], logs: AppState['logs'] = {}): AppState {
-  return { version: 1, worldName: 'Test', habits, todos: [], rewards: [], redemptions: [], logs, quests: {}, bosses: {}, companion: null, purchases: [], placements: {}, isSample: false, updatedAt: 0 };
+  return { version: 1, worldName: 'Test', habits, todos: [], rewards: [], redemptions: [], logs, quests: {}, bosses: {}, companion: null, purchases: [], placements: {}, checkins: {}, isSample: false, updatedAt: 0 };
 }
 
 function habit(overrides: Partial<Habit> = {}): Habit {

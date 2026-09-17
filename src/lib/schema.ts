@@ -68,6 +68,9 @@ export const stateSchema = z.object({
     .default(null),
   purchases: z.array(z.object({ id, itemId: slug, cost: z.number().int().min(0).max(100_000), on: dateKey })).max(1_000).default([]),
   placements: z.record(slug, slug).default({}),
+  checkins: z
+    .record(dateKey, z.object({ mood: z.number().int().min(1).max(5).nullable(), energy: z.number().int().min(1).max(5).nullable() }))
+    .default({}),
   isSample: z.boolean(),
   updatedAt: z.number().int().min(0).default(0),
 });
