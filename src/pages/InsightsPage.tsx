@@ -47,7 +47,8 @@ export function InsightsPage({ viewParam }: { viewParam?: string }) {
     // Keep the view in the address so it can be bookmarked, without adding history entries.
     history.replaceState(null, '', `#insights${v === 'wellbeing' ? '/mood' : ''}`);
   };
-  const [measure, setMeasure] = useState<Measure | 'both'>('mood');
+  // Starts on everything, like the All filter on the Habits view.
+  const [measure, setMeasure] = useState<Measure | 'both'>('both');
 
   const period = periodFor(kind, anchor);
   const isCurrent = period.start <= today && today <= period.end;
@@ -148,9 +149,9 @@ export function InsightsPage({ viewParam }: { viewParam?: string }) {
         {view === 'wellbeing' && (
           <div className="segmented" role="radiogroup" aria-label="Measure">
             {([
+              ['both', 'All'],
               ['mood', 'Mood'],
               ['energy', 'Energy'],
-              ['both', 'Both'],
             ] as const).map(([m, label]) => (
               <button key={m} type="button" role="radio" aria-checked={measure === m} onClick={() => setMeasure(m)}>
                 {label}

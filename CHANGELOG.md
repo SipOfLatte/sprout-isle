@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.4.1 (2026-09-17)
+
+### Changed
+- The Mood & energy filter now reads All, Mood, Energy, matching All, Health, Work on the Habits view. All comes first and is selected by default.
+
 ## 2.4.0 (2026-09-17)
 
 ### Added

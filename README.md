@@ -48,7 +48,7 @@ The Habits view follows a week or month filter.
 
 ![Insights, habits view](docs/screenshots/insights.png)
 
-The Mood & energy view uses the daily check-ins. You can look at mood, energy, or both together.
+The Mood & energy view uses the daily check-ins. It starts on All, which shows mood and energy together, and you can narrow it to either one.
 
 | Chart | What it shows |
 |---|---|
