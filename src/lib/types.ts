@@ -57,6 +57,28 @@ export interface Quest {
   area?: Area;
 }
 
+export type BossKind = 'slime' | 'wraith' | 'golem' | 'kraken' | 'gremlin' | 'ember';
+
+export interface Boss {
+  kind: BossKind;
+  hp: number;
+}
+
+export type Species = 'sprout' | 'fox' | 'frog';
+
+export interface Companion {
+  species: Species;
+  name: string;
+  adoptedOn: DateKey;
+}
+
+export interface Purchase {
+  id: string;
+  itemId: string;
+  cost: number;
+  on: DateKey;
+}
+
 /** logs[date][habitId] = amount logged that day. */
 export type Logs = Record<DateKey, Record<string, number>>;
 
@@ -70,6 +92,12 @@ export interface AppState {
   logs: Logs;
   /** quests[weekStart] = that week's quests, generated once on Monday. */
   quests: Record<DateKey, Quest[]>;
+  /** bosses[weekStart] = that week's boss, generated once like quests. */
+  bosses: Record<DateKey, Boss>;
+  companion: Companion | null;
+  purchases: Purchase[];
+  /** placements[slotId] = itemId placed on the island. */
+  placements: Record<string, string>;
   isSample: boolean;
   /** Epoch ms of the last local change; drives sync conflict detection. */
   updatedAt: number;

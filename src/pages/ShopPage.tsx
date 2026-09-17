@@ -6,8 +6,36 @@ import { XP_PER_COIN } from '../lib/engine';
 import { newId } from '../lib/storage';
 import { useFx } from '../state/fx';
 import { useStore } from '../state/store';
+import { IslandStore } from '../components/IslandStore';
 
-export function ShopPage() {
+type ShopView = 'island' | 'rewards';
+
+export function ShopPage({ onNavigate }: { onNavigate: (tab: string) => void }) {
+  const { progress } = useStore();
+  const [view, setView] = useState<ShopView>('island');
+
+  return (
+    <div className="shop">
+      <header className="page-head">
+        <h1>Shop</h1>
+        <span className="coin-balance">
+          <Icon name="coin" size={16} /> {progress.coins} coins
+        </span>
+      </header>
+      <div className="segmented shop__tabs" role="tablist" aria-label="Shop sections">
+        <button type="button" role="tab" aria-selected={view === 'island'} onClick={() => setView('island')}>
+          Island store
+        </button>
+        <button type="button" role="tab" aria-selected={view === 'rewards'} onClick={() => setView('rewards')}>
+          Real-life rewards
+        </button>
+      </div>
+      {view === 'island' ? <IslandStore onNavigate={onNavigate} /> : <RealRewards />}
+    </div>
+  );
+}
+
+function RealRewards() {
   const { state, dispatch, progress, today } = useStore();
   const { toast } = useFx();
   const [name, setName] = useState('');
@@ -37,14 +65,8 @@ export function ShopPage() {
   const history = [...state.redemptions].reverse().slice(0, 12);
 
   return (
-    <div className="shop">
-      <header className="page-head">
-        <h1>Rewards</h1>
-        <span className="coin-balance">
-          <Icon name="coin" size={16} /> {progress.coins} coins
-        </span>
-      </header>
-      <p className="muted">
+    <div>
+      <p className="muted shop__intro">
         Every {XP_PER_COIN} XP earns a coin. Set rewards that feel worth working for, then spend coins on them without guilt.
       </p>
 

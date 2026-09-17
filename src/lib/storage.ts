@@ -21,6 +21,10 @@ export function emptyState(): AppState {
     redemptions: [],
     logs: {},
     quests: {},
+    bosses: {},
+    companion: null,
+    purchases: [],
+    placements: {},
     isSample: false,
     updatedAt: 0,
   };

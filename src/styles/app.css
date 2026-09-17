@@ -1175,7 +1175,8 @@ input::placeholder {
   color: var(--ink-2);
 }
 
-.segmented button[aria-checked='true'] {
+.segmented button[aria-checked='true'],
+.segmented button[aria-selected='true'] {
   background: var(--ink);
   color: var(--surface);
   font-weight: 700;

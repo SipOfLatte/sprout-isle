@@ -25,6 +25,10 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'errands', name: 'Loose ends', description: 'Finish 5 to-dos', measure: (p) => p.todosDone, goal: 5 },
   { id: 'quest', name: 'Questing', description: 'Complete a weekly quest', measure: (p) => p.questsDone, goal: 1 },
   { id: 'quest-10', name: 'Seasoned adventurer', description: 'Complete 10 weekly quests', measure: (p) => p.questsDone, goal: 10 },
+  { id: 'boss', name: 'Giant slayer', description: 'Defeat a weekly boss', measure: (p) => p.bossesDefeated, goal: 1 },
+  { id: 'boss-5', name: 'Monster hunter', description: 'Defeat 5 weekly bosses', measure: (p) => p.bossesDefeated, goal: 5 },
+  { id: 'decorator', name: 'Decorator', description: 'Place 4 items on your island', measure: (_, s) => Object.keys(s.placements).length, goal: 4 },
+  { id: 'friend', name: 'A new friend', description: 'Hatch your companion', measure: (_, s) => (s.companion ? 1 : 0), goal: 1 },
   { id: 'treat', name: 'Earned it', description: 'Redeem your first reward', measure: (_, s) => s.redemptions.length, goal: 1 },
 ];
 

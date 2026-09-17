@@ -82,6 +82,16 @@ export function sampleState(today: DateKey, days = 90): AppState {
     redemptions: [],
     logs,
     quests: {},
+    bosses: {},
+    companion: { species: 'fox', name: 'Maple', adoptedOn: start },
+    purchases: [
+      { id: newId(), itemId: 'well', cost: 80, on: addDays(today, -40) },
+      { id: newId(), itemId: 'flower-bed', cost: 30, on: addDays(today, -35) },
+      { id: newId(), itemId: 'kite', cost: 40, on: addDays(today, -20) },
+      { id: newId(), itemId: 'chick', cost: 60, on: addDays(today, -12) },
+      { id: newId(), itemId: 'campfire', cost: 45, on: addDays(today, -6) },
+    ],
+    placements: { 'ground-2': 'well', 'ground-4': 'flower-bed', 'ground-7': 'campfire', 'sky-1': 'kite' },
     isSample: true,
     updatedAt: Date.now(),
   };

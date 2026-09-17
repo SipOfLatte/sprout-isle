@@ -1,0 +1,478 @@
+/* Companion, weekly boss, island store and decorating. */
+
+/* ---- Companion ---------------------------------------------------------- */
+
+.companion {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  margin: 16px 2px 0;
+  padding: 12px 14px;
+  background: var(--surface);
+  box-shadow:
+    0 -2px 0 var(--line),
+    0 2px 0 var(--line),
+    -2px 0 0 var(--line),
+    2px 0 0 var(--line);
+}
+
+.companion__pet {
+  display: grid;
+  place-items: end center;
+  min-width: 64px;
+  min-height: 56px;
+}
+
+.companion__pet svg {
+  animation: pet-bob 1.6s steps(2, jump-none) infinite;
+}
+
+.companion--overjoyed .companion__pet svg,
+.companion--proud .companion__pet svg {
+  animation-duration: 0.7s;
+}
+
+@keyframes pet-bob {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.companion__body {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Speech bubble with a pixel tail pointing at the pet. */
+.companion__line {
+  position: relative;
+  justify-self: start;
+  padding: 8px 12px;
+  background: var(--sunrise-soft);
+  font-weight: 700;
+  max-width: 60ch;
+}
+
+.companion__line::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 12px;
+  width: 8px;
+  height: 8px;
+  background: var(--sunrise-soft);
+  clip-path: polygon(100% 0, 0 50%, 100% 100%);
+}
+
+.companion__meta {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+.companion__bond {
+  height: 6px;
+  max-width: 240px;
+  background: var(--c-track);
+}
+
+.companion__bond span {
+  display: block;
+  height: 100%;
+  background: var(--c-health);
+}
+
+.companion--hatch {
+  grid-template-columns: 1fr;
+}
+
+.hatch {
+  display: grid;
+  gap: 12px;
+}
+
+.hatch__choices {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.hatch__choice {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 6px;
+  padding: 14px 10px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 2px var(--line);
+}
+
+.hatch__choice input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  cursor: pointer;
+}
+
+.hatch__choice.is-selected {
+  background: var(--sunrise-soft);
+  box-shadow: inset 0 0 0 3px var(--ink);
+}
+
+.hatch__choice:has(input:focus-visible) {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---- Boss --------------------------------------------------------------- */
+
+.today__quests {
+  display: grid;
+  gap: 24px;
+  align-content: start;
+}
+
+.boss {
+  padding: 16px;
+  margin: 0 2px;
+  display: grid;
+  gap: 10px;
+  background: var(--surface);
+  box-shadow:
+    0 -2px 0 var(--line),
+    0 2px 0 var(--line),
+    -2px 0 0 var(--line),
+    2px 0 0 var(--line);
+}
+
+.boss__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.boss__arena {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+}
+
+.boss__sprite {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 84px;
+  min-height: 72px;
+  padding: 6px;
+  background: var(--surface-2);
+}
+
+.boss__sprite.is-hit svg {
+  animation: boss-hit 420ms steps(6, end);
+}
+
+@keyframes boss-hit {
+  0%,
+  50% {
+    transform: translateX(-3px);
+    filter: brightness(1.8);
+  }
+  25%,
+  75% {
+    transform: translateX(3px);
+  }
+}
+
+.boss__damage {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  color: var(--danger);
+  animation: damage-float 900ms steps(6, end) forwards;
+}
+
+@keyframes damage-float {
+  to {
+    transform: translateY(-14px);
+    opacity: 0;
+  }
+}
+
+.boss.is-defeated .boss__sprite svg {
+  transform: scaleY(0.45);
+  transform-origin: bottom;
+  filter: grayscale(0.7);
+  opacity: 0.7;
+}
+
+.boss__info {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.boss__name {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--fs-md);
+  line-height: 1.15;
+}
+
+.boss__quote {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+.boss__hp {
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  gap: 2px;
+  height: 12px;
+}
+
+.boss__hp span {
+  background: var(--c-track);
+}
+
+.boss__hp span.on {
+  background: var(--danger);
+}
+
+.boss__numbers {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+.boss__reward {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-sm);
+  padding: 8px 10px;
+  background: var(--surface-2);
+}
+
+.boss.is-defeated .boss__reward {
+  background: var(--sunrise-soft);
+  font-weight: 700;
+}
+
+.boss__loot {
+  display: grid;
+  place-items: center;
+  min-width: 32px;
+}
+
+/* ---- Island store ------------------------------------------------------- */
+
+.shop__tabs {
+  margin-bottom: 16px;
+}
+
+.shop__intro {
+  margin-bottom: 16px;
+  max-width: 64ch;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.chip {
+  border: 0;
+  padding: 6px 12px;
+  min-height: 36px;
+  cursor: pointer;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 2px var(--line);
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--surface);
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.store-grid {
+  list-style: none;
+  margin: 0 2px;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.store-item {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--surface);
+  box-shadow:
+    0 -2px 0 var(--line),
+    0 2px 0 var(--line),
+    -2px 0 0 var(--line),
+    2px 0 0 var(--line);
+}
+
+/* A little strip of sky and grass for the item to stand on. */
+.store-item__art {
+  display: grid;
+  place-items: end center;
+  height: 112px;
+  padding-bottom: 22px;
+  background: linear-gradient(to bottom, var(--sky) 0 72%, #8ccb5e 72% 80%, #5e9e48 80% 82%, var(--surface-2) 82%);
+}
+
+.store-item__art--sky {
+  place-items: center;
+  background: var(--sky);
+  padding-bottom: 0;
+}
+
+.store-item__body {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  padding: 10px 12px 4px;
+}
+
+.store-item__foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 12px;
+  min-height: 52px;
+}
+
+.store-item__note {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+.store-item.is-owned .store-item__note:last-child {
+  color: var(--health);
+}
+
+.store-item.is-locked .store-item__art svg {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+/* ---- Decorate ----------------------------------------------------------- */
+
+.world-frame {
+  position: relative;
+}
+
+.slot-markers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.slot-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  min-width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  background: var(--sunrise);
+  color: #2b2d52;
+  box-shadow:
+    0 -2px 0 #2b2d52,
+    0 2px 0 #2b2d52,
+    -2px 0 0 #2b2d52,
+    2px 0 0 #2b2d52;
+}
+
+.slot-marker.is-taken {
+  background: #fbfdfe;
+}
+
+.decorate {
+  margin: 0 2px 28px;
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+  background: var(--surface);
+  box-shadow:
+    0 -2px 0 var(--line),
+    0 2px 0 var(--line),
+    -2px 0 0 var(--line),
+    2px 0 0 var(--line);
+}
+
+.decorate__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.companion-settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.companion-settings .field {
+  flex: 1 1 200px;
+}
+
+.deco-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.deco-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  background: var(--surface-2);
+}
+
+.deco-row__art {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+}
+
+.deco-row__field {
+  display: grid;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .companion__pet svg,
+  .boss__sprite.is-hit svg,
+  .boss__damage {
+    animation: none;
+  }
+}

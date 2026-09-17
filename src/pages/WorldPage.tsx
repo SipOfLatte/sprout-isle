@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { Decorate, SlotMarkers } from '../components/Decorate';
 import { Icon } from '../components/Icon';
 import { Isle } from '../components/Isle';
 import { AREA_LEVEL_BASE, levelInfo } from '../lib/engine';
@@ -7,6 +9,7 @@ import { LANDMARKS } from '../world/scene';
 
 export function WorldPage() {
   const { state, progress } = useStore();
+  const [showSpots, setShowSpots] = useState(false);
 
   return (
     <div className="world-page">
@@ -15,7 +18,10 @@ export function WorldPage() {
       </header>
       <div className="world-frame">
         <Isle variant="full" register />
+        {showSpots && <SlotMarkers />}
       </div>
+
+      <Decorate showSpots={showSpots} onToggleSpots={() => setShowSpots((s) => !s)} />
 
       <div className="areas">
         {(['health', 'work'] as Area[]).map((area) => {

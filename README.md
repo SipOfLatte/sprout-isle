@@ -26,8 +26,16 @@ own behaviour data.
 - Perfect-day and comeback bonuses.
 - **Weekly quests:** three quests each Monday, sized from your last four weeks.
   The first always targets the habit that has been slipping most.
+- **Companion pet:** hatch a sprout spirit, fox or frog that grows through three stages as you finish habits
+  and greets you each day. After a missed day it welcomes you back rather than pointing at the gap.
+- **Weekly boss battles:** six bosses with HP sized from your recent weeks. Every finished habit deals
+  damage by effort, so a partial week still counts. Wins pay XP and rare island items.
 - A floating island with 16 landmarks unlocked by area level, and a sky that follows the time of day.
-- Achievements and a rewards shop where you spend coins on treats you define.
+- **Shop:** spend coins on buildings, decorations, sky items and pets, then place them on the island.
+  Real-life rewards you define yourself live in the same tab.
+- Achievements.
+
+![Island store in the Shop tab](docs/screenshots/shop.png)
 
 ### Insights
 Week and month views with a single filter row (period, area) that scopes everything:
@@ -69,6 +77,9 @@ consistently, with no stored totals to drift out of step.
 | [`src/lib/engine.ts`](src/lib/engine.ts) | Scheduling, XP, levels, streaks, freezes, bonuses |
 | [`src/lib/analytics.ts`](src/lib/analytics.ts) | Period windows, completion scores, rolling mean, weekday profile, correlations, tidy export |
 | [`src/lib/quests.ts`](src/lib/quests.ts) | Weekly quest generation and evaluation |
+| [`src/lib/bosses.ts`](src/lib/bosses.ts) | Boss HP sizing, damage, wins and loot |
+| [`src/lib/pets.ts`](src/lib/pets.ts) | Companion growth and mood |
+| [`src/lib/catalog.ts`](src/lib/catalog.ts) | Store items, boss info and island placement spots |
 | [`src/lib/schema.ts`](src/lib/schema.ts) | zod schema for anything read from storage, backups or sync |
 | [`src/sync/`](src/sync) | Gist client and sync conflict logic |
 | [`src/world/`](src/world) | Pixel sprites and island scene builder |
@@ -81,6 +92,8 @@ consistently, with no stored totals to drift out of step.
 - **Correlation** is Pearson's r on binary completion over days both habits were due,
   which for two binary series is the phi coefficient. Pairs need at least 14 shared
   days and some variation, otherwise they show as n/a.
+- **Boss HP** is 85% of your average weekly damage over the last four weeks (easy habits hit for 1,
+  medium 2, hard 3, to-dos 1, perfect days 2), or 60% of this week's scheduled damage for new players.
 - **Quest targets** use the last four weeks: habit quests aim for the recent rate
   plus 20 percentage points, area quests for the recent score plus 10.
 - **Chart colours** were checked for colour-vision deficiency separation and contrast

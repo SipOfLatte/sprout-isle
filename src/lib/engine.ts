@@ -92,6 +92,13 @@ export interface Progress {
   checkIns: number;
   todosDone: number;
   questsDone: number;
+  bossesDefeated: number;
+}
+
+/** Bonus XP earned from quests and bosses, keyed by the day it was earned. */
+export interface Extras {
+  questXp?: Record<DateKey, number[]>;
+  bossXp?: Record<DateKey, number[]>;
 }
 
 export function firstDay(state: AppState, today: DateKey): DateKey {
@@ -104,8 +111,9 @@ export function firstDay(state: AppState, today: DateKey): DateKey {
   return minKey(...keys);
 }
 
-/** `questXp[day]` is quest reward XP earned that day (see quests.ts). */
-export function computeProgress(state: AppState, today: DateKey, questXp: Record<DateKey, number[]> = {}): Progress {
+export function computeProgress(state: AppState, today: DateKey, extras: Extras = {}): Progress {
+  const questXp = extras.questXp ?? {};
+  const bossXp = extras.bossXp ?? {};
   const p: Progress = {
     totalXp: 0,
     areaXp: { health: 0, work: 0 },
@@ -121,6 +129,7 @@ export function computeProgress(state: AppState, today: DateKey, questXp: Record
     checkIns: 0,
     todosDone: 0,
     questsDone: 0,
+    bossesDefeated: 0,
   };
 
   const todosByDay = new Map<DateKey, typeof state.todos>();
@@ -169,6 +178,11 @@ export function computeProgress(state: AppState, today: DateKey, questXp: Record
       p.questsDone++;
     }
 
+    for (const reward of bossXp[day] ?? []) {
+      xp.bonus += reward;
+      p.bossesDefeated++;
+    }
+
     if (pinned > 0 && pinnedDone === pinned) {
       xp.bonus += PERFECT_DAY_BONUS;
       p.perfectDays++;
@@ -200,7 +214,7 @@ export function computeProgress(state: AppState, today: DateKey, questXp: Record
     p.totalXp += dayTotal;
   }
 
-  p.coinsSpent = state.redemptions.reduce((s, r) => s + r.cost, 0);
+  p.coinsSpent = state.redemptions.reduce((s, r) => s + r.cost, 0) + state.purchases.reduce((s, r) => s + r.cost, 0);
   p.coins = Math.floor(p.totalXp / XP_PER_COIN) - p.coinsSpent;
   return p;
 }

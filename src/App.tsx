@@ -14,7 +14,7 @@ const TABS: { id: string; label: string; icon: IconName }[] = [
   { id: 'today', label: 'Today', icon: 'sun' },
   { id: 'world', label: 'Island', icon: 'isle' },
   { id: 'insights', label: 'Insights', icon: 'chart' },
-  { id: 'shop', label: 'Rewards', icon: 'gift' },
+  { id: 'shop', label: 'Shop', icon: 'gift' },
   { id: 'me', label: 'You', icon: 'person' },
 ];
 
@@ -98,7 +98,7 @@ export default function App() {
         {tab === 'today' && <TodayPage dayParam={route.param} onNavigate={go} />}
         {tab === 'world' && <WorldPage />}
         {tab === 'insights' && <InsightsPage />}
-        {tab === 'shop' && <ShopPage />}
+        {tab === 'shop' && <ShopPage onNavigate={go} />}
         {tab === 'me' && <MePage />}
       </main>
     </div>

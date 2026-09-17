@@ -24,6 +24,15 @@ export const PIXEL: Record<string, string> = {
   l: '#FFE08A', // lit window
   f: '#C08552', // fur
   m: '#E4574B', // mushroom cap
+  P: '#7B5CC9', // slime purple
+  L: '#B7A2F0', // slime light
+  a: '#6FD3B8', // spirit aqua
+  A: '#3FA98C', // spirit shadow
+  Y: '#F2C94C', // gold
+  q: '#F7A8B8', // cheek pink
+  B: '#5B87DC', // cool flame
+  e: '#E9EEF7', // ghost
+  E: '#AEB6CF', // ghost shadow
 };
 
 export interface Sprite {

@@ -26,6 +26,8 @@ const quest = z.object({
   area: area.optional(),
 });
 
+const slug = z.string().min(1).max(40).regex(/^[a-z0-9-]+$/);
+
 export const MAX_HABITS = 100;
 export const LIMITS = { importBytes: 5_000_000 };
 
@@ -57,6 +59,15 @@ export const stateSchema = z.object({
   logs: z.record(dateKey, z.record(id, z.number().int().min(0).max(10_000))),
   // Defaults keep v1 backups importable.
   quests: z.record(dateKey, z.array(quest).max(5)).default({}),
+  bosses: z
+    .record(dateKey, z.object({ kind: z.enum(['slime', 'wraith', 'golem', 'kraken', 'gremlin', 'ember']), hp: z.number().int().min(1).max(10_000) }))
+    .default({}),
+  companion: z
+    .object({ species: z.enum(['sprout', 'fox', 'frog']), name: z.string().trim().min(1).max(20), adoptedOn: dateKey })
+    .nullable()
+    .default(null),
+  purchases: z.array(z.object({ id, itemId: slug, cost: z.number().int().min(0).max(100_000), on: dateKey })).max(1_000).default([]),
+  placements: z.record(slug, slug).default({}),
   isSample: z.boolean(),
   updatedAt: z.number().int().min(0).default(0),
 });

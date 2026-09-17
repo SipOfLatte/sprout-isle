@@ -24,7 +24,7 @@ function habit(overrides: Partial<Habit> = {}): Habit {
 }
 
 const state = (habits: Habit[], logs: AppState['logs'] = {}, quests: AppState['quests'] = {}): AppState => ({
-  version: 1, worldName: 'x', habits, todos: [], rewards: [], redemptions: [], logs, quests, isSample: false, updatedAt: 0,
+  version: 1, worldName: 'x', habits, todos: [], rewards: [], redemptions: [], logs, quests, bosses: {}, companion: null, purchases: [], placements: {}, isSample: false, updatedAt: 0,
 });
 
 describe('generateQuests', () => {
@@ -69,7 +69,7 @@ describe('evaluateQuest', () => {
 
   it('feeds quest XP into progress', () => {
     const s = state([habit()], { [MONDAY]: { h1: 1 }, [addDays(MONDAY, 1)]: { h1: 1 } }, { [MONDAY]: [q] });
-    const p = computeProgress(s, T, questRewards(s, T));
+    const p = computeProgress(s, T, { questXp: questRewards(s, T) });
     expect(p.questsDone).toBe(1);
     expect(p.dailyXp[addDays(MONDAY, 1)].bonus).toBeGreaterThanOrEqual(60);
   });

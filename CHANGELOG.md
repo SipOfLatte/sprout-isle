@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.2.0 (2026-09-17)
+
+### Added
+- **Companion pet.** Hatch a sprout spirit, fox or frog. It grows through three stages as you finish habits, lives on your island, and greets you on the Today page. After a missed day it welcomes you back instead of pointing at the gap.
+- **Weekly boss battles.** Six bosses (the Procrastination Slime, Doomscroll Wraith, Snooze Golem, Couch Kraken, Chaos Gremlin and Burnout Ember). HP is sized from your last four weeks; every finished habit deals damage by effort, and to-dos and perfect days hit too. A win pays 80 XP and a rare item the first time you beat each kind.
+- **Island store.** A Shop tab with 19 things to buy (buildings, decorations, sky items and pets), unlocked by level, alongside your real-life rewards.
+- **Decorating.** Place buildings and decorations on eight spots along a new front ledge and three spots in the sky, from the Island page. Store pets move in by themselves.
+- Four achievements: Giant slayer, Monster hunter, Decorator, A new friend.
+
+### Changed
+- The island has a deeper meadow at the front to make room for decorations.
+- The Rewards tab is now Shop, with Island store and Real-life rewards sections.
+
 ## 2.1.0 (2026-09-17)
 
 ### Added

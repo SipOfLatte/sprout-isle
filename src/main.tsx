@@ -5,6 +5,7 @@ import '@fontsource/pixelify-sans/700.css';
 import '@fontsource/atkinson-hyperlegible/400.css';
 import '@fontsource/atkinson-hyperlegible/700.css';
 import './styles/app.css';
+import './styles/game.css';
 import App from './App';
 import { FxProvider } from './state/fx';
 import { StoreProvider } from './state/store';

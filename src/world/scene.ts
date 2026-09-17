@@ -1,6 +1,8 @@
 // Builds the floating-island scene as a pixel grid, then merges horizontal
 // runs of the same colour into rects so the SVG stays small.
 
+import { PET_SPOTS, SLOTS } from '../lib/catalog';
+import { ITEM_ART, PET_ART } from './art';
 import { PIXEL, SPRITES, type Sprite } from './sprites';
 import type { Area } from '../lib/types';
 
@@ -55,6 +57,9 @@ export const SEED_TARGET: Record<Area, { x: number; y: number }> = {
 };
 
 type Grid = (string | null)[][];
+
+/** Last row of the grass; the front ledge below the landmarks holds placed items. */
+const GROUND_BOTTOM = 68;
 
 function hash(x: number, y: number): number {
   let h = Math.imul(x * 374761393 + y * 668265263, 1274126177);
@@ -118,15 +123,15 @@ function disc(grid: Grid, cx: number, cy: number, r: number, color: string) {
 
 function paintIsland(grid: Grid) {
   const grass = ['#8CCB5E', '#7DBE52'];
-  for (let y = 48; y <= 56; y++) {
+  for (let y = 48; y <= GROUND_BOTTOM; y++) {
     const inset = y === 48 ? 8 : y === 49 ? 3 : 0;
     for (let x = 24 + inset; x <= 136 - inset; x++) {
-      const edge = y === 56 || x === 24 + inset || x === 136 - inset;
+      const edge = y === GROUND_BOTTOM || x === 24 + inset || x === 136 - inset;
       put(grid, x, y, edge ? '#5E9E48' : grass[hash(x, y) > 0.82 ? 1 : 0]);
     }
   }
-  for (let y = 57; y < H; y++) {
-    const half = 56 - (y - 57) * 2.1 - hash(0, y) * 3;
+  for (let y = GROUND_BOTTOM + 1; y < H; y++) {
+    const half = 56 - (y - GROUND_BOTTOM - 1) * 2.7 - hash(0, y) * 3;
     if (half < 2) break;
     for (let x = Math.round(80 - half); x <= Math.round(80 + half); x++) {
       const n = hash(x, y);
@@ -199,14 +204,37 @@ export interface Rect {
   c: string;
 }
 
-export function buildScene(levels: Record<Area, number>, phase: SkyPhase): Rect[] {
+export interface Decorations {
+  /** slotId -> itemId, already filtered to items the player owns. */
+  placements: Record<string, string>;
+  /** Companion (species + stage) first, then store pets by item id. */
+  pets: { art: string; stage?: number }[];
+}
+
+export function buildScene(levels: Record<Area, number>, phase: SkyPhase, deco: Decorations = { placements: {}, pets: [] }): Rect[] {
   const grid: Grid = Array.from({ length: H }, () => Array<string | null>(W).fill(null));
   paintSky(grid, phase);
+
+  // Sky items sit behind the island.
+  for (const slot of SLOTS.filter((s) => s.kind === 'sky')) {
+    const art = ITEM_ART[deco.placements[slot.id] ?? ''];
+    if (art) stamp(grid, art, slot.x, slot.bottom);
+  }
+
   paintIsland(grid);
   if (levels.work >= 1) paintPath(grid);
-  for (const p of [...PLACEMENTS].sort((a, b) => a.bottom - b.bottom)) {
-    if (levels[p.area] >= p.level) stamp(grid, p.sprite, p.x, p.bottom);
+
+  const layers: { sprite: Sprite; x: number; bottom: number }[] = PLACEMENTS.filter((p) => levels[p.area] >= p.level);
+  deco.pets.slice(0, PET_SPOTS.length).forEach((pet, i) => {
+    const sprite = pet.stage !== undefined ? PET_ART[pet.art]?.[pet.stage] : ITEM_ART[pet.art];
+    if (sprite) layers.push({ sprite, ...PET_SPOTS[i] });
+  });
+  for (const slot of SLOTS.filter((s) => s.kind === 'ground')) {
+    const art = ITEM_ART[deco.placements[slot.id] ?? ''];
+    // Centre narrower items in their 12px slot.
+    if (art) layers.push({ sprite: art, x: slot.x + Math.max(0, Math.floor((12 - art.rows[0].length) / 2)), bottom: slot.bottom });
   }
+  for (const layer of layers.sort((a, b) => a.bottom - b.bottom)) stamp(grid, layer.sprite, layer.x, layer.bottom);
   if (levels.work >= 7) paintSails(grid);
 
   const rects: Rect[] = [];

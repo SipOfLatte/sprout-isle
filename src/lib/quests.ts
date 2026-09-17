@@ -15,7 +15,7 @@ const MAX_STORED_WEEKS = 26;
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
-function seedFrom(key: string): number {
+export function seedFrom(key: string): number {
   let h = 2166136261;
   for (const ch of key) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
   return h >>> 0;
@@ -26,7 +26,7 @@ function weekDays(weekStart: DateKey) {
 }
 
 /** Days in the week this habit is expected: pinned days, or its weekly quota. */
-function expectedInWeek(habit: Habit, weekStart: DateKey): number {
+export function expectedInWeek(habit: Habit, weekStart: DateKey): number {
   const s = habit.schedule;
   if (s.kind === 'weekly') return weekDays(weekStart).some((d) => isActiveOn(habit, d)) ? s.times : 0;
   return weekDays(weekStart).filter((d) => isPinnedTo(habit, d)).length;

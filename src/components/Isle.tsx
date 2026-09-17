@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
+import { ITEMS_BY_ID, SLOTS } from '../lib/catalog';
 import { AREA_LEVEL_BASE, levelInfo } from '../lib/engine';
+import { bond, stageFor } from '../lib/pets';
 import { useFx } from '../state/fx';
 import { useStore } from '../state/store';
 import { buildScene, SEED_TARGET, skyPhase, W } from '../world/scene';
@@ -14,7 +16,7 @@ function useHour() {
 }
 
 export function Isle({ variant = 'full', register = false }: { variant?: 'full' | 'banner'; register?: boolean }) {
-  const { progress, state } = useStore();
+  const { progress, state, owned, today } = useStore();
   const { registerIsle, landed } = useFx();
   const hour = useHour();
 
@@ -23,7 +25,22 @@ export function Isle({ variant = 'full', register = false }: { variant?: 'full' 
     work: levelInfo(progress.areaXp.work, AREA_LEVEL_BASE).level,
   };
   const phase = skyPhase(hour);
-  const rects = useMemo(() => buildScene(levels, phase), [levels.health, levels.work, phase]); // eslint-disable-line react-hooks/exhaustive-deps
+  const companion = state.companion;
+  const stage = companion ? stageFor(bond(state, companion, today)).stage : 0;
+  const placements = Object.fromEntries(
+    Object.entries(state.placements).filter(([slot, item]) => owned.has(item) && SLOTS.some((s) => s.id === slot)),
+  );
+  const storePets = [...owned].filter((id) => ITEMS_BY_ID.get(id)?.kind === 'pet');
+  const decoKey = JSON.stringify([placements, companion?.species, stage, storePets]);
+
+  const rects = useMemo(
+    () =>
+      buildScene(levels, phase, {
+        placements,
+        pets: [...(companion ? [{ art: companion.species, stage }] : []), ...storePets.map((art) => ({ art }))],
+      }),
+    [levels.health, levels.work, phase, decoKey], // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   const viewBox = variant === 'banner' ? `0 20 ${W} 58` : `12 18 136 68`;
   const target = landed ? SEED_TARGET[landed.area] : null;
