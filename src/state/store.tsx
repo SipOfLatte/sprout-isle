@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from 'react';
 import { todayKey, type DateKey } from '../lib/dates';
 import { computeProgress, type Progress } from '../lib/engine';
+import { pruneQuests, questRewards, questsToGenerate } from '../lib/quests';
 import { loadState, newId, saveState } from '../lib/storage';
-import type { AppState, Area, Difficulty, Habit, Reward } from '../lib/types';
+import type { AppState, Area, Difficulty, Habit, Quest, Reward } from '../lib/types';
 
 export type Action =
   | { type: 'setAmount'; habitId: string; day: DateKey; amount: number }
@@ -17,9 +18,22 @@ export type Action =
   | { type: 'deleteReward'; id: string }
   | { type: 'redeem'; rewardId: string; day: DateKey }
   | { type: 'setWorldName'; name: string }
-  | { type: 'replace'; state: AppState };
+  | { type: 'setQuests'; weekStart: DateKey; quests: Quest[] }
+  /** `fromSync` keeps the incoming timestamp so a pulled copy isn't seen as a new local edit. */
+  | { type: 'replace'; state: AppState; fromSync?: boolean };
 
 function reducer(state: AppState, action: Action): AppState {
+  if (action.type === 'replace') return action.fromSync ? action.state : { ...action.state, updatedAt: Date.now() };
+  if (action.type === 'setQuests') {
+    // Not a user edit: every device generates the same quests from the same data,
+    // so this doesn't bump updatedAt (which would trigger needless sync conflicts).
+    return { ...state, quests: pruneQuests({ ...state.quests, [action.weekStart]: action.quests }) };
+  }
+  const next = apply(state, action);
+  return next === state ? state : { ...next, updatedAt: Date.now() };
+}
+
+function apply(state: AppState, action: Exclude<Action, { type: 'replace' | 'setQuests' }>): AppState {
   switch (action.type) {
     case 'setAmount': {
       const day = { ...(state.logs[action.day] ?? {}) };
@@ -84,8 +98,6 @@ function reducer(state: AppState, action: Action): AppState {
     }
     case 'setWorldName':
       return { ...state, worldName: action.name.trim().slice(0, 40) || 'Sprout Isle' };
-    case 'replace':
-      return action.state;
   }
 }
 
@@ -122,7 +134,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setSaveFailed(!saveState(state));
   }, [state]);
 
-  const progress = useMemo(() => computeProgress(state, today), [state, today]);
+  useEffect(() => {
+    const pending = questsToGenerate(state, today);
+    if (pending) dispatch({ type: 'setQuests', ...pending });
+  }, [state, today]);
+
+  const progress = useMemo(() => computeProgress(state, today, questRewards(state, today)), [state, today]);
   const value = useMemo(() => ({ state, dispatch, progress, today, saveFailed }), [state, progress, today, saveFailed]);
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

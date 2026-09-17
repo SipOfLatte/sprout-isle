@@ -81,6 +81,8 @@ export function sampleState(today: DateKey, days = 90): AppState {
     ],
     redemptions: [],
     logs,
+    quests: {},
     isSample: true,
+    updatedAt: Date.now(),
   };
 }

@@ -21,7 +21,7 @@ const base = (h: Partial<Habit>): Habit => ({
 });
 
 const state = (habits: Habit[], logs: AppState['logs']): AppState => ({
-  version: 1, worldName: 'x', habits, todos: [], rewards: [], redemptions: [], logs, isSample: false,
+  version: 1, worldName: 'x', habits, todos: [], rewards: [], redemptions: [], logs, quests: {}, isSample: false, updatedAt: 0,
 });
 
 describe('periods', () => {

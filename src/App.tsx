@@ -28,17 +28,18 @@ function useCelebrations() {
   const { toast } = useFx();
   const level = levelInfo(progress.totalXp).level;
   const unlocked = unlockedIds(progress, state);
-  const prev = useRef({ level, unlocked, sample: state.isSample, habits: state.habits });
+  const prev = useRef({ level, unlocked, sample: state.isSample, habits: state.habits, quests: progress.questsDone });
 
   useEffect(() => {
     const before = prev.current;
-    prev.current = { level, unlocked, sample: state.isSample, habits: state.habits };
+    prev.current = { level, unlocked, sample: state.isSample, habits: state.habits, quests: progress.questsDone };
     // A bulk change (import, sample data, erase) shouldn't set off a parade of toasts.
     if (before.sample !== state.isSample || Math.abs(level - before.level) > 1) return;
+    if (progress.questsDone === before.quests + 1) toast('Quest complete', 'Bonus XP added to your island.');
     if (level > before.level) toast(`Level ${level}!`, 'Your island grows a little brighter.');
     const fresh = ACHIEVEMENTS.filter((a) => unlocked.has(a.id) && !before.unlocked.has(a.id));
     if (fresh.length > 0 && fresh.length <= 2) fresh.forEach((a) => toast('Achievement unlocked', a.name));
-  }, [level, unlocked, state.isSample, state.habits, toast]);
+  }, [level, unlocked, state.isSample, state.habits, progress.questsDone, toast]);
 }
 
 export default function App() {

@@ -1,6 +1,7 @@
 import { useRef, useState, type ChangeEvent } from 'react';
 import { confirmAction } from '../components/Dialog';
 import { Icon } from '../components/Icon';
+import { SyncSettings } from '../components/SyncSettings';
 import { ACHIEVEMENTS } from '../lib/achievements';
 import { downloadText } from '../lib/csv';
 import { formatShort } from '../lib/dates';
@@ -11,13 +12,14 @@ import { emptyState } from '../lib/storage';
 import { AREA_LABEL } from '../lib/types';
 import { useFx } from '../state/fx';
 import { useStore } from '../state/store';
+import { useSync } from '../sync/SyncProvider';
 
 export function MePage() {
   const { state, dispatch, progress, today } = useStore();
   const { toast } = useFx();
+  const sync = useSync();
   const fileRef = useRef<HTMLInputElement>(null);
   const [importError, setImportError] = useState<string | null>(null);
-  const [worldName, setWorldName] = useState(state.worldName);
   const lvl = levelInfo(progress.totalXp);
   const archived = state.habits.filter((h) => h.archivedOn !== null);
 
@@ -34,7 +36,6 @@ export function MePage() {
       if (!parsed) return setImportError("That file isn't a valid backup. Nothing was changed.");
       if (!confirmAction('Replace everything in the app with this backup?')) return;
       dispatch({ type: 'replace', state: parsed });
-      setWorldName(parsed.worldName);
       toast('Backup restored');
     } catch {
       setImportError("That file couldn't be read as JSON. Nothing was changed.");
@@ -48,9 +49,9 @@ export function MePage() {
   };
 
   const erase = () => {
-    if (!confirmAction('Erase all habits, history and rewards? This cannot be undone.')) return;
+    const where = sync.login ? ' Sync is on, so this also clears the synced copy and your other devices.' : '';
+    if (!confirmAction(`Erase all habits, history and rewards? This cannot be undone.${where}`)) return;
     dispatch({ type: 'replace', state: emptyState() });
-    setWorldName('Sprout Isle');
   };
 
   return (
@@ -126,26 +127,32 @@ export function MePage() {
         </section>
       )}
 
+      <SyncSettings />
+
       <section aria-labelledby="settings-title" className="settings">
         <h2 id="settings-title">Island and data</h2>
+        {/* Keyed on the saved name so an import or sync refreshes the field. */}
         <form
+          key={state.worldName}
           className="inline-fields"
           onSubmit={(e) => {
             e.preventDefault();
-            dispatch({ type: 'setWorldName', name: worldName });
+            dispatch({ type: 'setWorldName', name: String(new FormData(e.currentTarget).get('worldName') ?? '') });
             toast('Island renamed');
           }}
         >
           <label className="field">
             <span className="field__label">Island name</span>
-            <input value={worldName} onChange={(e) => setWorldName(e.target.value)} maxLength={40} />
+            <input name="worldName" defaultValue={state.worldName} maxLength={40} />
           </label>
           <button type="submit" className="btn">
             Rename
           </button>
         </form>
 
-        <p className="muted">Your data stays in this browser. Nothing is sent anywhere. Export a backup now and then so you don't lose it.</p>
+        <p className="muted">
+          Your data lives in this browser{sync.login ? ' and your sync gist' : ''}. Export a backup now and then so you don't lose it.
+        </p>
         <div className="button-row">
           <button type="button" className="btn" onClick={exportJson}>
             Export backup

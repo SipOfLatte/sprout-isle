@@ -631,16 +631,35 @@ select {
   gap: 24px;
 }
 
+/* Phones: island, today's list, then quests. Wide screens: island and quests on the left. */
+.today {
+  grid-template-areas: 'world' 'main' 'quests';
+}
+
+.today__world {
+  grid-area: world;
+}
+
+.today__main {
+  grid-area: main;
+}
+
+.today__quests {
+  grid-area: quests;
+}
+
+.today__quests .quests {
+  margin-top: 0;
+}
+
 @media (min-width: 1040px) {
   .today {
     grid-template-columns: minmax(320px, 400px) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 'world main' 'quests main';
     align-items: start;
-    gap: 40px;
-  }
-
-  .today__world {
-    position: sticky;
-    top: 32px;
+    column-gap: 40px;
+    row-gap: 24px;
   }
 }
 
@@ -1734,4 +1753,172 @@ input::placeholder {
   .sprout {
     display: none;
   }
+}
+
+/* ---- Quests ------------------------------------------------------------- */
+
+.quests {
+  margin: 24px 2px 0;
+  padding: 16px;
+  background: var(--surface);
+  box-shadow:
+    0 -2px 0 var(--line),
+    0 2px 0 var(--line),
+    -2px 0 0 var(--line),
+    2px 0 0 var(--line);
+}
+
+.quests__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.quests__meta {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+.quest-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.quest {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.quest__icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  background: var(--surface-2);
+  color: var(--ink-3);
+}
+
+.quest.is-done .quest__icon {
+  background: var(--sunrise);
+  color: #2b2d52;
+}
+
+.quest__body {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.quest__title {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.quest.is-done .quest__title {
+  color: var(--ink-2);
+}
+
+.quest__bar {
+  height: 8px;
+  background: var(--c-track);
+}
+
+.quest__bar span {
+  display: block;
+  height: 100%;
+  background: var(--sunrise);
+}
+
+.quest__reward {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  white-space: nowrap;
+  min-width: 7ch;
+  text-align: right;
+}
+
+.quests__foot {
+  margin-top: 14px;
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+}
+
+.quest__title small {
+  font-weight: 400;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+/* ---- Sync --------------------------------------------------------------- */
+
+.sync a:not(.btn) {
+  color: var(--ink);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+a.btn {
+  text-decoration: none;
+}
+
+.steps {
+  margin: 0;
+  padding-left: 1.4em;
+  display: grid;
+  gap: 6px;
+  max-width: 70ch;
+}
+
+.fine-print {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+.fine-print summary {
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.fine-print ul {
+  margin: 8px 0 0;
+  padding-left: 1.2em;
+  display: grid;
+  gap: 4px;
+  max-width: 70ch;
+}
+
+.conflict {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  background: var(--sunrise-soft);
+}
+
+.conflict__options {
+  display: grid;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+@media (min-width: 640px) {
+  .conflict__options {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.conflict__options > div {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  justify-items: start;
 }

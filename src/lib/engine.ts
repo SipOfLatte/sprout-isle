@@ -69,6 +69,7 @@ export interface Progress {
   comebacks: number;
   checkIns: number;
   todosDone: number;
+  questsDone: number;
 }
 
 export function firstDay(state: AppState, today: DateKey): DateKey {
@@ -81,7 +82,8 @@ export function firstDay(state: AppState, today: DateKey): DateKey {
   return minKey(...keys);
 }
 
-export function computeProgress(state: AppState, today: DateKey): Progress {
+/** `questXp[day]` is quest reward XP earned that day (see quests.ts). */
+export function computeProgress(state: AppState, today: DateKey, questXp: Record<DateKey, number[]> = {}): Progress {
   const p: Progress = {
     totalXp: 0,
     areaXp: { health: 0, work: 0 },
@@ -96,6 +98,7 @@ export function computeProgress(state: AppState, today: DateKey): Progress {
     comebacks: 0,
     checkIns: 0,
     todosDone: 0,
+    questsDone: 0,
   };
 
   const todosByDay = new Map<DateKey, typeof state.todos>();
@@ -137,6 +140,11 @@ export function computeProgress(state: AppState, today: DateKey): Progress {
       xp[t.area] += XP_BY_DIFFICULTY[t.difficulty];
       p.todosDone++;
       active = true;
+    }
+
+    for (const reward of questXp[day] ?? []) {
+      xp.bonus += reward;
+      p.questsDone++;
     }
 
     if (pinned > 0 && pinnedDone === pinned) {

@@ -23,6 +23,8 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'grove', name: 'Grove keeper', description: 'Grow Health & body to area level 5', measure: (p) => levelInfo(p.areaXp.health, AREA_LEVEL_BASE).level, goal: 5 },
   { id: 'town', name: 'Town builder', description: 'Grow Work & study to area level 5', measure: (p) => levelInfo(p.areaXp.work, AREA_LEVEL_BASE).level, goal: 5 },
   { id: 'errands', name: 'Loose ends', description: 'Finish 5 to-dos', measure: (p) => p.todosDone, goal: 5 },
+  { id: 'quest', name: 'Questing', description: 'Complete a weekly quest', measure: (p) => p.questsDone, goal: 1 },
+  { id: 'quest-10', name: 'Seasoned adventurer', description: 'Complete 10 weekly quests', measure: (p) => p.questsDone, goal: 10 },
   { id: 'treat', name: 'Earned it', description: 'Redeem your first reward', measure: (_, s) => s.redemptions.length, goal: 1 },
 ];
 

@@ -16,6 +16,16 @@ const schedule = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('weekly'), times: z.number().int().min(1).max(7) }),
 ]);
 
+const quest = z.object({
+  id: z.string().min(1).max(64).regex(/^[A-Za-z0-9-]+$/),
+  kind: z.enum(['habit', 'perfect', 'area', 'total', 'todos']),
+  target: z.number().int().min(1).max(10_000),
+  xp: z.number().int().min(1).max(1_000),
+  habitId: id.optional(),
+  habitName: name.optional(),
+  area: area.optional(),
+});
+
 export const MAX_HABITS = 100;
 export const LIMITS = { importBytes: 5_000_000 };
 
@@ -45,7 +55,10 @@ export const stateSchema = z.object({
     .array(z.object({ id, rewardId: id, name, cost: z.number().int().min(1).max(100_000), on: dateKey }))
     .max(10_000),
   logs: z.record(dateKey, z.record(id, z.number().int().min(0).max(10_000))),
+  // Defaults keep v1 backups importable.
+  quests: z.record(dateKey, z.array(quest).max(5)).default({}),
   isSample: z.boolean(),
+  updatedAt: z.number().int().min(0).default(0),
 });
 
 export function parseState(input: unknown): AppState | null {

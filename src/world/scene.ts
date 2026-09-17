@@ -96,10 +96,10 @@ function paintSky(grid: Grid, phase: SkyPhase) {
       const y = Math.floor(hash(i, 13) * 44);
       put(grid, x, y, i % 5 === 0 ? '#FFE9A8' : '#DDE3FF');
     }
-    disc(grid, 128, 14, 5, '#F2F0FF');
-    disc(grid, 130, 12, 4, SKY.night[0]);
+    disc(grid, 132, 28, 5, '#F2F0FF');
+    disc(grid, 134, 26, 4, SKY.night[0]);
   } else {
-    const sun = { dawn: [30, 36, '#FFB86B'], day: [128, 14, '#FFD166'], dusk: [132, 34, '#FF9E6B'] }[phase] as [number, number, string];
+    const sun = { dawn: [30, 36, '#FFB86B'], day: [132, 28, '#FFD166'], dusk: [132, 34, '#FF9E6B'] }[phase] as [number, number, string];
     disc(grid, sun[0], sun[1], 6, sun[2]);
   }
 

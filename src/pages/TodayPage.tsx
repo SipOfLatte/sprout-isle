@@ -4,6 +4,7 @@ import { HabitRow } from '../components/HabitRow';
 import { Icon } from '../components/Icon';
 import { Isle } from '../components/Isle';
 import { PlayerBar } from '../components/PlayerBar';
+import { QuestBoard } from '../components/QuestBoard';
 import { addDays, diffDays, formatLong, type DateKey } from '../lib/dates';
 import { amountOn, isActiveOn, isDone, isDueOn } from '../lib/engine';
 import { AREA_LABEL, XP_BY_DIFFICULTY, type Area, type Difficulty, type Habit } from '../lib/types';
@@ -45,6 +46,10 @@ export function TodayPage({ onNavigate }: { onNavigate: (tab: string) => void })
           <PlayerBar />
         </div>
       </aside>
+
+      <div className="today__quests">
+        <QuestBoard />
+      </div>
 
       <section className="today__main" aria-labelledby="day-title">
         {state.isSample && (

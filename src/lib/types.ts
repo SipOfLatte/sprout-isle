@@ -44,6 +44,19 @@ export interface Redemption {
   on: DateKey;
 }
 
+export type QuestKind = 'habit' | 'perfect' | 'area' | 'total' | 'todos';
+
+export interface Quest {
+  id: string;
+  kind: QuestKind;
+  target: number;
+  xp: number;
+  habitId?: string;
+  /** Habit name when the quest was made, used if the habit is later deleted. */
+  habitName?: string;
+  area?: Area;
+}
+
 /** logs[date][habitId] = amount logged that day. */
 export type Logs = Record<DateKey, Record<string, number>>;
 
@@ -55,7 +68,11 @@ export interface AppState {
   rewards: Reward[];
   redemptions: Redemption[];
   logs: Logs;
+  /** quests[weekStart] = that week's quests, generated once on Monday. */
+  quests: Record<DateKey, Quest[]>;
   isSample: boolean;
+  /** Epoch ms of the last local change; drives sync conflict detection. */
+  updatedAt: number;
 }
 
 export const AREA_LABEL: Record<Area, string> = {

@@ -8,6 +8,7 @@ import './styles/app.css';
 import App from './App';
 import { FxProvider } from './state/fx';
 import { StoreProvider } from './state/store';
+import { SyncProvider } from './sync/SyncProvider';
 
 // Dev-only: `?demo` seeds sample data into an empty browser for screenshots.
 if (import.meta.env.DEV && new URLSearchParams(location.search).has('demo')) {
@@ -18,9 +19,11 @@ if (import.meta.env.DEV && new URLSearchParams(location.search).has('demo')) {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <StoreProvider>
-      <FxProvider>
-        <App />
-      </FxProvider>
+      <SyncProvider>
+        <FxProvider>
+          <App />
+        </FxProvider>
+      </SyncProvider>
     </StoreProvider>
   </StrictMode>,
 );

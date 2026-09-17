@@ -9,7 +9,8 @@ const csp = [
   "style-src 'self'",
   "img-src 'self' data:",
   "font-src 'self'",
-  "connect-src 'self'",
+  // GitHub API for optional Gist sync; raw host serves large gist files.
+  "connect-src 'self' https://api.github.com https://gist.githubusercontent.com",
   "manifest-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",

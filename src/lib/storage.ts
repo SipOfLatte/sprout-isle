@@ -20,7 +20,9 @@ export function emptyState(): AppState {
     ],
     redemptions: [],
     logs: {},
+    quests: {},
     isSample: false,
+    updatedAt: 0,
   };
 }
 
