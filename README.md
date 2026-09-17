@@ -48,7 +48,7 @@ The Habits view follows a week or month filter.
 
 ![Insights, habits view](docs/screenshots/insights.png)
 
-The Mood & energy view uses the daily check-ins.
+The Mood & energy view uses the daily check-ins. You can look at mood, energy, or both together.
 
 | Chart | What it shows |
 |---|---|
@@ -118,7 +118,7 @@ Every push to `main` runs the tests, builds the site and deploys it to GitHub Pa
 
 ## Built with
 
-React 19 and TypeScript on Vite. The charts are hand-built SVG using d3-scale and d3-shape, validation uses zod, and the tests run on Vitest. Fonts are Pixelify Sans and Atkinson Hyperlegible, served with the app.
+React 19 and TypeScript on Vite. The charts are hand-built SVG using d3-scale and d3-shape, validation uses zod, and the tests run on Vitest. Fonts are Pixelify Sans for headings, Tiny5 for numbers and Atkinson Hyperlegible for everything else, all served with the app.
 
 ## License
 

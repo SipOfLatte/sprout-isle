@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.4.0 (2026-09-17)
+
+### Added
+- A Both option on the Mood & energy view. The habit effects, scatter plot, weekday chart and perfect-days tile then show mood and energy together, in their own colours.
+
+### Changed
+- The All, Health and Work filter only appears on the Habits view. Check-ins aren't tied to a part of life, so it did nothing on Mood & energy.
+- Numbers use the Tiny5 pixel font, because Pixelify Sans draws 5 almost like an S. Letters still use Pixelify Sans.
+- The habit effects summary quotes habit names, so it reads "on days with "In bed by 11:30"" instead of "on days you do in bed by 11:30".
+
 ## 2.3.1 (2026-09-17)
 
 ### Changed

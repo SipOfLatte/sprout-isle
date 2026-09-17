@@ -26,7 +26,7 @@ import {
 import { toCsv, downloadText } from '../lib/csv';
 import { addDays, diffDays, minKey, type DateKey } from '../lib/dates';
 import { mean } from '../lib/stats';
-import { completionVsRating, habitEffects, LOOKBACK_DAYS, weekdayRatings, wellbeingSeries, wellbeingSummary, type Measure } from '../lib/wellbeing';
+import { completionVsRating, habitEffects, LOOKBACK_DAYS, MEASURE_NAME, weekdayRatings, wellbeingSeries, wellbeingSummary, type Measure } from '../lib/wellbeing';
 import { CompletionScatter } from '../charts/CompletionScatter';
 import { HabitEffectsChart } from '../charts/HabitEffectsChart';
 import { MoodTrendChart } from '../charts/MoodTrendChart';
@@ -47,7 +47,7 @@ export function InsightsPage({ viewParam }: { viewParam?: string }) {
     // Keep the view in the address so it can be bookmarked, without adding history entries.
     history.replaceState(null, '', `#insights${v === 'wellbeing' ? '/mood' : ''}`);
   };
-  const [measure, setMeasure] = useState<Measure>('mood');
+  const [measure, setMeasure] = useState<Measure | 'both'>('mood');
 
   const period = periodFor(kind, anchor);
   const isCurrent = period.start <= today && today <= period.end;
@@ -131,6 +131,8 @@ export function InsightsPage({ viewParam }: { viewParam?: string }) {
             </button>
           )}
         </div>
+        {/* Check-ins aren't tied to a part of life, so the area filter only applies to the Habits view. */}
+        {view === 'habits' && (
         <div className="segmented" role="radiogroup" aria-label="Part of life">
           {([
             ['all', 'All'],
@@ -142,11 +144,16 @@ export function InsightsPage({ viewParam }: { viewParam?: string }) {
             </button>
           ))}
         </div>
+        )}
         {view === 'wellbeing' && (
           <div className="segmented" role="radiogroup" aria-label="Measure">
-            {(['mood', 'energy'] as const).map((m) => (
+            {([
+              ['mood', 'Mood'],
+              ['energy', 'Energy'],
+              ['both', 'Both'],
+            ] as const).map(([m, label]) => (
               <button key={m} type="button" role="radio" aria-checked={measure === m} onClick={() => setMeasure(m)}>
-                {m === 'mood' ? 'Mood' : 'Energy'}
+                {label}
               </button>
             ))}
           </div>
@@ -154,7 +161,7 @@ export function InsightsPage({ viewParam }: { viewParam?: string }) {
       </div>
 
       {view === 'wellbeing' ? (
-        <WellbeingView period={period} prevSlice={prevSlice} area={area} measure={measure} kind={kind} isCurrent={isCurrent} />
+        <WellbeingView period={period} prevSlice={prevSlice} measure={measure} kind={kind} isCurrent={isCurrent} />
       ) : state.habits.length === 0 ? (
         <p className="empty">Your charts appear once you've tracked a habit or two. Want to explore first? Load sample data from the Me tab.</p>
       ) : (
@@ -187,30 +194,30 @@ export function InsightsPage({ viewParam }: { viewParam?: string }) {
 function WellbeingView({
   period,
   prevSlice,
-  area,
   measure,
   kind,
   isCurrent,
 }: {
   period: { start: DateKey; end: DateKey };
   prevSlice: { start: DateKey; end: DateKey };
-  area: AreaFilter;
-  measure: Measure;
+  measure: Measure | 'both';
   kind: PeriodKind;
   isCurrent: boolean;
 }) {
   const { state, today } = useStore();
+
+  const measures: Measure[] = measure === 'both' ? ['mood', 'energy'] : [measure];
 
   const data = useMemo(
     () => ({
       now: wellbeingSummary(state, period.start, period.end, today),
       before: wellbeingSummary(state, prevSlice.start, prevSlice.end, today),
       series: wellbeingSeries(state, period.start, period.end, today),
-      effects: habitEffects(state, today, measure, area),
-      scatter: completionVsRating(state, today, measure, area),
-      weekdays: weekdayRatings(state, today, measure),
+      effects: measures.map((m) => ({ measure: m, effects: habitEffects(state, today, m, 'all') })),
+      scatter: measures.map((m) => ({ measure: m, ...completionVsRating(state, today, m, 'all') })),
+      weekdays: measures.map((m) => ({ measure: m, points: weekdayRatings(state, today, m) })),
     }),
-    [state, today, period.start, period.end, prevSlice.start, prevSlice.end, measure, area],
+    [state, today, period.start, period.end, prevSlice.start, prevSlice.end, measure], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   if (Object.keys(state.checkins).length === 0) {
@@ -221,10 +228,13 @@ function WellbeingView({
     );
   }
 
-  const { now, before, weekdays } = data;
-  // Last 90 days: days where every scheduled habit was finished vs the rest.
-  const perfect = data.scatter.points.filter((p) => p.score === 1).map((p) => p.rating);
-  const others = data.scatter.points.filter((p) => p.score < 1).map((p) => p.rating);
+  const { now, before } = data;
+  // Last 90 days: the average rating on days every scheduled habit was finished, vs the rest.
+  const perfectVsOthers = data.scatter.map(({ measure: m, points }) => {
+    const perfect = points.filter((p) => p.score === 1).map((p) => p.rating);
+    const others = points.filter((p) => p.score < 1).map((p) => p.rating);
+    return { measure: m, text: perfect.length && others.length ? `${mean(perfect)!.toFixed(1)} vs ${mean(others)!.toFixed(1)}` : 'n/a' };
+  });
   const oneDp = (a: number | null, b: number | null) => (a === null || b === null ? null : Math.round((a - b) * 10) / 10);
 
   return (
@@ -234,8 +244,9 @@ function WellbeingView({
         <Kpi label="Average energy" value={now.energy === null ? 'n/a' : `${now.energy.toFixed(1)} / 5`} delta={oneDp(now.energy, before.energy)} kind={kind} isCurrent={isCurrent} />
         <Kpi label="Days checked in" value={`${now.checkedIn} of ${now.days}`} delta={null} kind={kind} isCurrent={isCurrent} />
         <Kpi
-          label={`${measure === 'mood' ? 'Mood' : 'Energy'}: perfect days vs others`}
-          value={perfect.length && others.length ? `${mean(perfect)!.toFixed(1)} vs ${mean(others)!.toFixed(1)}` : 'n/a'}
+          label={`${MEASURE_NAME[perfectVsOthers[0].measure]}: perfect days vs others`}
+          value={perfectVsOthers[0].text}
+          detail={perfectVsOthers[1] && `${MEASURE_NAME[perfectVsOthers[1].measure]}: ${perfectVsOthers[1].text}`}
           delta={null}
           kind={kind}
           isCurrent={isCurrent}
@@ -244,9 +255,9 @@ function WellbeingView({
 
       <div className="chart-grid">
         <MoodTrendChart points={data.series} monthly={kind === 'month'} />
-        <HabitEffectsChart effects={data.effects} measure={measure} />
-        <CompletionScatter points={data.scatter.points} fit={data.scatter.fit} measure={measure} />
-        <WeekdayRatingChart points={weekdays} measure={measure} />
+        <HabitEffectsChart series={data.effects} />
+        <CompletionScatter series={data.scatter} />
+        <WeekdayRatingChart series={data.weekdays} />
       </div>
       <p className="footnote">
         Habit effects and the scatter plot look back {LOOKBACK_DAYS} days from today, and the weekday chart 12 weeks, so they don't change with the period filter.
@@ -256,11 +267,29 @@ function WellbeingView({
 }
 
 /** A stat tile. The delta compares against the same number of elapsed days in the previous period. */
-function Kpi({ label, value, delta, unit = '', kind, isCurrent }: { label: string; value: string; delta: number | null; unit?: string; kind: PeriodKind; isCurrent: boolean }) {
+function Kpi({
+  label,
+  value,
+  detail,
+  delta,
+  unit = '',
+  kind,
+  isCurrent,
+}: {
+  label: string;
+  value: string;
+  /** An optional second line, used when a tile covers both mood and energy. */
+  detail?: string;
+  delta: number | null;
+  unit?: string;
+  kind: PeriodKind;
+  isCurrent: boolean;
+}) {
   return (
     <div className="kpi">
       <span className="kpi__label">{label}</span>
       <span className="kpi__value">{value}</span>
+      {detail && <span className="kpi__detail">{detail}</span>}
       {delta !== null && (
         <span className={`kpi__delta${delta > 0 ? ' is-up' : delta < 0 ? ' is-down' : ''}`}>
           {delta > 0 ? '+' : delta < 0 ? '−' : '±'}

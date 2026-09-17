@@ -42,7 +42,7 @@
   --c-div-neg-3: #c7651a;
   --grid: #e6ebf2;
 
-  --font-display: 'Pixelify Sans', ui-monospace, monospace;
+  --font-display: 'Sprout Digits', 'Pixelify Sans', ui-monospace, monospace;
   --font-body: 'Atkinson Hyperlegible', system-ui, sans-serif;
 
   --fs-xs: 0.8125rem;
@@ -99,6 +99,17 @@
     --grid: #30355c;
     color-scheme: dark;
   }
+}
+
+/* Pixelify Sans draws 5 almost like an S, so digits come from Tiny5, a pixel font
+   with clearer numbers. unicode-range limits this face to 0-9; letters still use Pixelify.
+   The weight range stops the browser faking a bold version. */
+@font-face {
+  font-family: 'Sprout Digits';
+  src: url('@fontsource/tiny5/files/tiny5-latin-400-normal.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0030-0039;
 }
 
 *,

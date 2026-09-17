@@ -10,6 +10,10 @@ import type { AppState, Habit } from './types';
 
 export type Measure = 'mood' | 'energy';
 
+export const MEASURE_NAME: Record<Measure, string> = { mood: 'Mood', energy: 'Energy' };
+/** CSS colours for each measure; the values are set per theme in app.css. */
+export const MEASURE_COLOR: Record<Measure, string> = { mood: 'var(--c-mood)', energy: 'var(--c-energy)' };
+
 export const MOOD_LABELS = ['Rough', 'Low', 'Okay', 'Good', 'Great'];
 export const ENERGY_LABELS = ['Drained', 'Tired', 'Steady', 'Lively', 'Energised'];
 export const LOOKBACK_DAYS = 90;

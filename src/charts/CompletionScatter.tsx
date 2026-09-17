@@ -1,32 +1,44 @@
-// One dot per day: share of habits completed against that day's mood or energy, with a least-squares line.
+// One dot per day: share of habits completed against that day's mood or energy, with a least-squares
+// line. With both measures selected, each gets its own colour and line on the same axes.
 
 import { scaleLinear } from 'd3-scale';
 import { formatShort } from '../lib/dates';
 import { openDay } from '../lib/nav';
 import { seedFrom } from '../lib/quests';
 import type { LinearFit } from '../lib/stats';
-import { LOOKBACK_DAYS, type Measure, type ScatterPoint } from '../lib/wellbeing';
+import { LOOKBACK_DAYS, MEASURE_COLOR, MEASURE_NAME, type Measure, type ScatterPoint } from '../lib/wellbeing';
 import { useStore } from '../state/store';
-import { ChartCard, EmptyChart, pct, useTooltip, useWidth } from './common';
+import { ChartCard, EmptyChart, Legend, pct, useTooltip, useWidth } from './common';
 
 const HEIGHT = 240;
 const M = { top: 12, right: 14, bottom: 34, left: 30 };
 
-/** Ratings are whole numbers, so dots get a small, stable vertical jitter to stay visible. */
-const jitter = (day: string) => ((seedFrom(day) % 1000) / 1000 - 0.5) * 0.36;
+export interface ScatterSeries {
+  measure: Measure;
+  points: ScatterPoint[];
+  fit: LinearFit | null;
+}
 
-export function CompletionScatter({ points, fit, measure }: { points: ScatterPoint[]; fit: LinearFit | null; measure: Measure }) {
+/** Ratings are whole numbers, so dots get a small, stable vertical jitter to stay visible.
+ *  Energy uses a different seed so its dots don't sit exactly on top of mood's. */
+const jitter = (day: string, measure: Measure) => ((seedFrom(day + measure) % 1000) / 1000 - 0.5) * 0.36;
+
+function describeFit(s: ScatterSeries): string {
+  if (!s.fit) return `${MEASURE_NAME[s.measure]} needs more variation for a trend line.`;
+  const perQuarter = s.fit.slope * 0.25;
+  return `${MEASURE_NAME[s.measure]}: r = ${s.fit.r.toFixed(2)} over ${s.fit.n} days, and finishing a quarter more of your habits goes with ${perQuarter >= 0 ? '+' : '−'}${Math.abs(perQuarter).toFixed(2)}.`;
+}
+
+export function CompletionScatter({ series }: { series: ScatterSeries[] }) {
   const [ref, width] = useWidth<HTMLDivElement>();
   const { wrapRef, show, hide, node } = useTooltip();
   const { today } = useStore();
-  const color = measure === 'mood' ? 'var(--c-mood)' : 'var(--c-energy)';
+  const paired = series.length > 1;
+  const names = series.map((s) => s.measure).join(' and ');
 
   const x = scaleLinear().domain([0, 1]).range([M.left + 6, width - M.right]);
   const y = scaleLinear().domain([0.6, 5.4]).range([HEIGHT - M.bottom, M.top]);
-
-  const description = fit
-    ? `Each dot is a day from the last ${LOOKBACK_DAYS}. Correlation r = ${fit.r.toFixed(2)} over ${fit.n} days: finishing a quarter more of your habits goes with ${fit.slope * 0.25 >= 0 ? '+' : '−'}${Math.abs(fit.slope * 0.25).toFixed(2)} ${measure}.`
-    : `Each dot is a day from the last ${LOOKBACK_DAYS}. A trend line appears once there's enough variation.`;
+  const enough = series.some((s) => s.points.length >= 3);
 
   const table = (
     <table>
@@ -34,29 +46,43 @@ export function CompletionScatter({ points, fit, measure }: { points: ScatterPoi
         <tr>
           <th scope="col">Day</th>
           <th scope="col">Habits completed</th>
-          <th scope="col">{measure === 'mood' ? 'Mood' : 'Energy'}</th>
+          {series.map((s) => (
+            <th scope="col" key={s.measure}>
+              {MEASURE_NAME[s.measure]}
+            </th>
+          ))}
         </tr>
       </thead>
       <tbody>
-        {points.map((p) => (
-          <tr key={p.day}>
-            <th scope="row">{formatShort(p.day)}</th>
-            <td>{pct(p.score)}</td>
-            <td>{p.rating}</td>
-          </tr>
-        ))}
+        {[...new Set(series.flatMap((s) => s.points.map((p) => p.day)))].sort().map((day) => {
+          const score = series.flatMap((s) => s.points).find((p) => p.day === day)!.score;
+          return (
+            <tr key={day}>
+              <th scope="row">{formatShort(day)}</th>
+              <td>{pct(score)}</td>
+              {series.map((s) => (
+                <td key={s.measure}>{s.points.find((p) => p.day === day)?.rating ?? 'n/a'}</td>
+              ))}
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );
 
   return (
-    <ChartCard title={`Completion vs ${measure}`} description={description} table={table}>
+    <ChartCard
+      title={`Completion vs ${names}`}
+      description={`Each dot is a day from the last ${LOOKBACK_DAYS}. ${series.map(describeFit).join(' ')}`}
+      legend={paired && <Legend items={series.map((s) => ({ label: MEASURE_NAME[s.measure], color: MEASURE_COLOR[s.measure] }))} />}
+      table={table}
+    >
       <div ref={ref} className="chart">
-        {points.length < 3 ? (
+        {!enough ? (
           <EmptyChart>Needs a few days with both habits and a check-in.</EmptyChart>
         ) : (
           <div ref={wrapRef} className="chart__wrap">
-            <svg width={width} height={HEIGHT} role="img" aria-label={`Scatter plot of daily habit completion against ${measure}`}>
+            <svg width={width} height={HEIGHT} role="img" aria-label={`Scatter plot of daily habit completion against ${names}`}>
               {[1, 2, 3, 4, 5].map((t) => (
                 <g key={t}>
                   <line className="grid" x1={M.left} x2={width - M.right} y1={y(t)} y2={y(t)} />
@@ -74,30 +100,55 @@ export function CompletionScatter({ points, fit, measure }: { points: ScatterPoi
                 habits completed that day
               </text>
 
-              {points.map((p) => (
-                <circle key={p.day} className="dot-ring" cx={x(p.score)} cy={y(p.rating + jitter(p.day))} r={4} fill={color} fillOpacity={0.7} />
-              ))}
-              {fit && <line className="fit-line" x1={x(0)} x2={x(1)} y1={y(fit.intercept)} y2={y(fit.intercept + fit.slope)} />}
-
-              {points.map((p) => {
-                const tip = (el: Element) =>
-                  show(el, formatShort(p.day), [
-                    { value: pct(p.score), label: 'of habits completed' },
-                    { value: String(p.rating), label: measure, key: color },
-                  ]);
-                return (
+              {series.map((s) =>
+                s.points.map((p) => (
                   <circle
-                    key={`hit-${p.day}`}
-                    className="hit is-clickable"
+                    key={`${s.measure}-${p.day}`}
+                    className="dot-ring"
                     cx={x(p.score)}
-                    cy={y(p.rating + jitter(p.day))}
-                    r={10}
-                    onPointerEnter={(e) => tip(e.currentTarget)}
-                    onPointerLeave={hide}
-                    onClick={() => openDay(p.day, today)}
+                    cy={y(p.rating + jitter(p.day, s.measure))}
+                    r={4}
+                    fill={MEASURE_COLOR[s.measure]}
+                    fillOpacity={0.7}
                   />
-                );
-              })}
+                )),
+              )}
+              {series.map(
+                (s) =>
+                  s.fit && (
+                    <line
+                      key={`fit-${s.measure}`}
+                      className="fit-line"
+                      style={paired ? { stroke: MEASURE_COLOR[s.measure] } : undefined}
+                      x1={x(0)}
+                      x2={x(1)}
+                      y1={y(s.fit.intercept)}
+                      y2={y(s.fit.intercept + s.fit.slope)}
+                    />
+                  ),
+              )}
+
+              {series.map((s) =>
+                s.points.map((p) => {
+                  const tip = (el: Element) =>
+                    show(el, formatShort(p.day), [
+                      { value: pct(p.score), label: 'of habits completed' },
+                      { value: String(p.rating), label: s.measure, key: MEASURE_COLOR[s.measure] },
+                    ]);
+                  return (
+                    <circle
+                      key={`hit-${s.measure}-${p.day}`}
+                      className="hit is-clickable"
+                      cx={x(p.score)}
+                      cy={y(p.rating + jitter(p.day, s.measure))}
+                      r={10}
+                      onPointerEnter={(e) => tip(e.currentTarget)}
+                      onPointerLeave={hide}
+                      onClick={() => openDay(p.day, today)}
+                    />
+                  );
+                }),
+              )}
             </svg>
             {node}
           </div>
