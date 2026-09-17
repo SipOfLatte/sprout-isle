@@ -31,4 +31,6 @@ export default defineConfig({
   // Relative paths so the build also works from a GitHub Pages sub-folder.
   base: './',
   plugins: [react(), contentSecurityPolicy()],
+  // Keep fonts and images as files: inlined data: URIs would be blocked by font-src 'self'.
+  build: { assetsInlineLimit: 0 },
 })
