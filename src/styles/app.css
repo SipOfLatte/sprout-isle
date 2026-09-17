@@ -397,6 +397,8 @@ select {
   min-height: 32px;
   padding: 4px 10px;
   font-size: var(--fs-sm);
+  white-space: nowrap;
+  flex: none;
 }
 
 .btn--add {
@@ -687,6 +689,19 @@ select {
 
 .day-head__date {
   color: var(--ink-2);
+}
+
+.day-head__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: none;
+}
+
+@media (max-width: 420px) {
+  .hide-narrow {
+    display: none;
+  }
 }
 
 .day-nav {
@@ -1034,7 +1049,7 @@ input::placeholder {
 }
 
 .inline-fields .field:not(.field--small) {
-  flex: 1 1 220px;
+  flex: 1 1 160px;
 }
 
 .choice-row {
@@ -1958,21 +1973,7 @@ a.btn {
   gap: 6px;
 }
 
-.week-strip__cal {
-  grid-column: 1 / -1;
-  justify-self: start;
-}
 
-@media (min-width: 640px) {
-  .week-strip {
-    grid-template-columns: auto minmax(0, 1fr) auto auto;
-  }
-
-  .week-strip__cal {
-    grid-column: auto;
-    margin-left: 8px;
-  }
-}
 
 .day-chip {
   width: 100%;

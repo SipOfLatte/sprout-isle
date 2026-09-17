@@ -39,7 +39,6 @@ function dayInfo(state: AppState, p: DailyPoint): DayInfo {
 
 export function WeekStrip({ day, onSelect }: { day: DateKey; onSelect: (d: DateKey) => void }) {
   const { state, today } = useStore();
-  const [pickerOpen, setPickerOpen] = useState(false);
   const weekStart = startOfWeek(day);
   const points = dailySeries(state, weekStart, addDays(weekStart, 6), today, 'all');
   const earliest = firstDay(state, today);
@@ -93,22 +92,32 @@ export function WeekStrip({ day, onSelect }: { day: DateKey; onSelect: (d: DateK
         <Icon name="right" size={12} />
       </button>
 
-      <button type="button" className="btn btn--tiny week-strip__cal" onClick={() => setPickerOpen(true)}>
-        <Icon name="calendar" size={12} /> Calendar
-      </button>
+    </div>
+  );
+}
 
-      <Dialog open={pickerOpen} onClose={() => setPickerOpen(false)} title="Go to a day">
-        {pickerOpen && (
+/** Opens the month calendar. Lives in the day header so it sits with the other day controls. */
+export function CalendarButton({ day, onSelect }: { day: DateKey; onSelect: (d: DateKey) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button type="button" className="btn btn--tiny" onClick={() => setOpen(true)} aria-label="Open calendar">
+        <Icon name="calendar" size={12} />
+        {/* The word is dropped on narrow screens; the icon and aria-label still say what it does. */}
+        <span className="hide-narrow">Calendar</span>
+      </button>
+      <Dialog open={open} onClose={() => setOpen(false)} title="Go to a day">
+        {open && (
           <MonthPicker
             day={day}
             onSelect={(d) => {
-              setPickerOpen(false);
+              setOpen(false);
               onSelect(d);
             }}
           />
         )}
       </Dialog>
-    </div>
+    </>
   );
 }
 

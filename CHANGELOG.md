@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.4.2 (2026-09-18)
+
+### Changed
+- The Calendar button moved from under the week strip into the day header, next to the button that jumps back to today. On phones it shows just the calendar icon so the heading stays on one line.
+- On phones, text fields and their buttons (Rename, Connect) share a row instead of the button dropping underneath.
+- The island store shows two items per row on phones, which halves the length of the page.
+- Small buttons like Show table no longer break onto two lines.
+
 ## 2.4.1 (2026-09-17)
 
 ### Changed

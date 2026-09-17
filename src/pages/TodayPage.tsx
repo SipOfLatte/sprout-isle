@@ -11,7 +11,7 @@ import { QuestBoard } from '../components/QuestBoard';
 import { BossCard } from '../components/BossCard';
 import { CompanionCorner } from '../components/Companion';
 import { CheckInCard } from '../components/CheckInCard';
-import { WeekStrip } from '../components/DayBrowser';
+import { CalendarButton, WeekStrip } from '../components/DayBrowser';
 import { diffDays, formatLong, type DateKey } from '../lib/dates';
 import { openDay } from '../lib/nav';
 import { dayTally, isActiveOn, isDueOn } from '../lib/engine';
@@ -79,11 +79,14 @@ export function TodayPage({ dayParam, onNavigate }: { dayParam?: string; onNavig
             <h1 id="day-title">{isToday ? 'Today' : daysBack === 1 ? 'Yesterday' : `${daysBack} days ago`}</h1>
             <p className="day-head__date">{formatLong(viewDay)}</p>
           </div>
-          {!isToday && (
-            <button type="button" className="btn btn--tiny" onClick={() => setDay(today)}>
-              Back to today
-            </button>
-          )}
+          <div className="day-head__actions">
+            {!isToday && (
+              <button type="button" className="btn btn--tiny" onClick={() => setDay(today)}>
+                Today
+              </button>
+            )}
+            <CalendarButton day={viewDay} onSelect={setDay} />
+          </div>
         </header>
 
         <WeekStrip day={viewDay} onSelect={setDay} />
