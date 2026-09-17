@@ -8,6 +8,7 @@ import { Icon } from '../components/Icon';
 import { Isle } from '../components/Isle';
 import { PlayerBar } from '../components/PlayerBar';
 import { QuestBoard } from '../components/QuestBoard';
+import { SortableList } from '../components/SortableList';
 import { BossCard } from '../components/BossCard';
 import { CompanionCorner } from '../components/Companion';
 import { CheckInCard } from '../components/CheckInCard';
@@ -32,7 +33,7 @@ const STARTERS: (HabitDraft & { name: string })[] = [
 ];
 
 export function TodayPage({ dayParam, onNavigate }: { dayParam?: string; onNavigate: (tab: string) => void }) {
-  const { state, today, progress } = useStore();
+  const { state, dispatch, today, progress } = useStore();
   const [editing, setEditing] = useState<{ habit: Habit | null; preset?: HabitDraft } | null>(null);
 
   // The viewed day comes from the URL (#today/2026-09-14) so it survives reloads and browser back.
@@ -131,19 +132,15 @@ export function TodayPage({ dayParam, onNavigate }: { dayParam?: string; onNavig
                 </span>
               )}
             </p>
-            <ul className="habit-list">
-              {due.map((h) => (
-                <HabitRow key={h.id} habit={h} day={viewDay} readOnly={!editable} onEdit={(habit) => setEditing({ habit })} />
-              ))}
-            </ul>
+            <SortableList items={due} label={(h) => h.name} disabled={!editable} onReorder={(ids) => dispatch({ type: 'reorderHabits', ids })}>
+              {(h, row) => <HabitRow key={h.id} habit={h} day={viewDay} readOnly={!editable} row={row} onEdit={(habit) => setEditing({ habit })} />}
+            </SortableList>
             {other.length > 0 && (
               <details className="others">
                 <summary>Not scheduled {isToday ? 'today' : 'this day'} ({other.length})</summary>
-                <ul className="habit-list">
-                  {other.map((h) => (
-                    <HabitRow key={h.id} habit={h} day={viewDay} readOnly={!editable} onEdit={(habit) => setEditing({ habit })} />
-                  ))}
-                </ul>
+                <SortableList items={other} label={(h) => h.name} disabled={!editable} onReorder={(ids) => dispatch({ type: 'reorderHabits', ids })}>
+                  {(h, row) => <HabitRow key={h.id} habit={h} day={viewDay} readOnly={!editable} row={row} onEdit={(habit) => setEditing({ habit })} />}
+                </SortableList>
               </details>
             )}
           </>
@@ -203,9 +200,15 @@ function Todos({ day, readOnly }: { day: DateKey; readOnly: boolean }) {
       {visible.length === 0 ? (
         <p className="muted">{readOnly ? 'No to-dos finished this day.' : 'No to-dos. Add anything you keep putting off.'}</p>
       ) : (
-        <ul className="habit-list">
-          {visible.map((t) => (
-            <li key={t.id} className={`habit habit--chore${t.doneOn ? ' is-done' : ''}`}>
+        <SortableList items={visible} label={(t) => t.name} disabled={readOnly} onReorder={(ids) => dispatch({ type: 'reorderTodos', ids })}>
+          {(t, row) => (
+            <li
+              key={t.id}
+              ref={row?.ref}
+              style={row?.style}
+              className={`habit habit--chore${t.doneOn ? ' is-done' : ''}${row ? ' is-sortable' : ''}${row?.isDragging ? ' is-dragging' : ''}`}
+            >
+              {row?.handle}
               <button
                 type="button"
                 className="check"
@@ -229,8 +232,8 @@ function Todos({ day, readOnly }: { day: DateKey; readOnly: boolean }) {
                 </button>
               </div>
             </li>
-          ))}
-        </ul>
+          )}
+        </SortableList>
       )}
     </section>
   );

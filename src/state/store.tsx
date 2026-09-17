@@ -7,6 +7,7 @@ import { computeProgress, type Progress } from '../lib/engine';
 import { bossOutcomes, generateBoss, pruneBosses } from '../lib/bosses';
 import { ITEMS_BY_ID, SLOTS, slotAccepts } from '../lib/catalog';
 import { startOfWeek } from '../lib/dates';
+import { reorderSubset } from '../lib/order';
 import { pruneQuests, questRewards, questsToGenerate } from '../lib/quests';
 import { loadState, newId, saveState } from '../lib/storage';
 import type { AppState, Boss, Difficulty, Habit, Quest, Reward, Species } from '../lib/types';
@@ -20,6 +21,8 @@ export type Action =
   | { type: 'addTodo'; name: string; difficulty: Difficulty; day: DateKey }
   | { type: 'toggleTodo'; id: string; day: DateKey }
   | { type: 'deleteTodo'; id: string }
+  | { type: 'reorderHabits'; ids: string[] }
+  | { type: 'reorderTodos'; ids: string[] }
   | { type: 'saveReward'; reward: Reward }
   | { type: 'deleteReward'; id: string }
   | { type: 'redeem'; rewardId: string; day: DateKey }
@@ -92,6 +95,11 @@ function apply(state: AppState, action: Exclude<Action, { type: 'replace' | 'set
         ...state,
         todos: state.todos.map((t) => (t.id === action.id ? { ...t, doneOn: t.doneOn ? null : action.day } : t)),
       };
+    // A drag reorders only the rows on screen; reorderSubset keeps everything else in place.
+    case 'reorderHabits':
+      return { ...state, habits: reorderSubset(state.habits, action.ids) };
+    case 'reorderTodos':
+      return { ...state, todos: reorderSubset(state.todos, action.ids) };
     case 'deleteTodo':
       return { ...state, todos: state.todos.filter((t) => t.id !== action.id) };
     case 'saveReward': {

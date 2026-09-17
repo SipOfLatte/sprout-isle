@@ -7,8 +7,22 @@ import { AREA_LABEL, XP_BY_DIFFICULTY, type Habit } from '../lib/types';
 import { useFx } from '../state/fx';
 import { useStore } from '../state/store';
 import { Icon } from './Icon';
+import type { SortableRow } from './SortableList';
 
-export function HabitRow({ habit, day, readOnly = false, onEdit }: { habit: Habit; day: DateKey; readOnly?: boolean; onEdit: (h: Habit) => void }) {
+export function HabitRow({
+  habit,
+  day,
+  readOnly = false,
+  onEdit,
+  row,
+}: {
+  habit: Habit;
+  day: DateKey;
+  readOnly?: boolean;
+  onEdit: (h: Habit) => void;
+  /** Drag wiring from SortableList, or null when the list can't be reordered. */
+  row?: SortableRow | null;
+}) {
   const { state, dispatch, today } = useStore();
   const { launchSeed } = useFx();
   const checkRef = useRef<HTMLButtonElement>(null);
@@ -33,7 +47,12 @@ export function HabitRow({ habit, day, readOnly = false, onEdit }: { habit: Habi
   if (s.kind === 'weekly') meta.push(`${weekCount} of ${s.times} this week`);
 
   return (
-    <li className={`habit habit--${habit.area}${done ? ' is-done' : ''}`}>
+    <li
+      ref={row?.ref}
+      style={row?.style}
+      className={`habit habit--${habit.area}${done ? ' is-done' : ''}${row ? ' is-sortable' : ''}${row?.isDragging ? ' is-dragging' : ''}`}
+    >
+      {row?.handle}
       {measured ? (
         <div className="stepper" role="group" aria-label={`${habit.name} amount`}>
           <button type="button" className="stepper__btn" onClick={() => set(amount - 1)} disabled={readOnly || amount === 0} aria-label={`Remove one ${habit.unit || 'unit'}`}>

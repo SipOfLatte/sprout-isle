@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.6.0 (2026-09-18)
+
+### Added
+- Drag to reorder habits and to-dos on Today. Each row has a grip handle on the left; drag it with a mouse or finger, or focus it and use space and the arrow keys. The order is saved and syncs.
+- When you reorder the habits due today, habits that aren't showing keep their place in the list.
+
 ## 2.5.0 (2026-09-18)
 
 ### Changed

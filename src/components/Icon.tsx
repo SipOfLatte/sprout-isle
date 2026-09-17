@@ -20,6 +20,7 @@ const ICONS = {
   person: ['..xxx..', '..xxx..', '...x...', '.xxxxx.', '...x...', '..x.x..', '.x...x.'],
   sun: ['...x...', '.x...x.', '..xxx..', 'x.xxx.x', '..xxx..', '.x...x.', '...x...'],
   close: ['x...x', '.x.x.', '..x..', '.x.x.', 'x...x'],
+  grip: ['x.x', '...', 'x.x', '...', 'x.x'],
   calendar: ['.x...x.', 'xxxxxxx', 'x.....x', 'x.x.x.x', 'x.....x', 'x.x.x.x', 'xxxxxxx'],
 } as const;
 

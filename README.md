@@ -12,7 +12,7 @@ To look around without tracking anything yourself, open the You tab and choose L
 
 ### Tracking
 
-A habit can be yes or no, or an amount like 8 glasses of water. It can repeat every day, on chosen weekdays, or a set number of times a week, and you can edit, pause or delete it whenever you like. There's also a to-do list for chores and one-off tasks, which earn XP by effort without belonging to a part of life.
+A habit can be yes or no, or an amount like 8 glasses of water. It can repeat every day, on chosen weekdays, or a set number of times a week, and you can edit, pause or delete it whenever you like. There's also a to-do list for chores and one-off tasks, which earn XP by effort without belonging to a part of life. You can drag habits and to-dos into whatever order you like.
 
 The week strip and calendar on Today open any past day. You can still tick things off for the last seven days. Older days are read-only so streaks stay honest.
 
@@ -118,7 +118,7 @@ Every push to `main` runs the tests, builds the site and deploys it to GitHub Pa
 
 ## Built with
 
-React 19 and TypeScript on Vite. The charts are hand-built SVG using d3-scale and d3-shape, validation uses zod, and the tests run on Vitest. Fonts are Pixelify Sans for headings, Tiny5 for numbers and Atkinson Hyperlegible for everything else, all served with the app.
+React 19 and TypeScript on Vite. The charts are hand-built SVG using d3-scale and d3-shape, drag and drop uses dnd-kit, validation uses zod, and the tests run on Vitest. Fonts are Pixelify Sans for headings, Tiny5 for numbers and Atkinson Hyperlegible for everything else, all served with the app.
 
 ## License
 
