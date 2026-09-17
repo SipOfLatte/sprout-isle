@@ -26,7 +26,7 @@
 ## 2.3.1 (2026-09-17)
 
 ### Changed
-- Rewrote the README, sync guide and this changelog in plainer language.
+- Clarified the README, sync guide and this changelog.
 - Added comments to every source file explaining what it does, plus notes on the less obvious logic.
 
 ## 2.3.0 (2026-09-17)
