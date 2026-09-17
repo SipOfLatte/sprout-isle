@@ -1,0 +1,33 @@
+import react from '@vitejs/plugin-react'
+import { defineConfig, type Plugin } from 'vite'
+
+// Strict Content Security Policy for production builds. Dev is skipped because
+// Vite's hot reload relies on inline scripts.
+const csp = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "connect-src 'self'",
+  "manifest-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ')
+
+function contentSecurityPolicy(): Plugin {
+  return {
+    name: 'content-security-policy',
+    apply: 'build',
+    transformIndexHtml: (html) =>
+      html.replace('<meta charset="UTF-8" />', `<meta charset="UTF-8" />\n    <meta http-equiv="Content-Security-Policy" content="${csp}" />`),
+  }
+}
+
+// https://vite.dev/config/
+export default defineConfig({
+  // Relative paths so the build also works from a GitHub Pages sub-folder.
+  base: './',
+  plugins: [react(), contentSecurityPolicy()],
+})

@@ -1,0 +1,10 @@
+{
+  "name": "Sprout Isle",
+  "short_name": "Sprout Isle",
+  "description": "A habit tracker where every habit you keep grows a small pixel island.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#D9ECF3",
+  "theme_color": "#D9ECF3",
+  "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
