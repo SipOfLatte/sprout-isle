@@ -1,11 +1,11 @@
 // The "Paused, deleted and done" section on the You tab: paused habits, Recently deleted
-// (kept 7 days) and finished to-dos grouped by day.
+// (restorable for 7 days) and finished to-dos grouped by day.
 
 import { useEffect, useRef, useState } from 'react';
 import { formatLong, formatShort, type DateKey } from '../lib/dates';
 import { scheduleLabel } from '../lib/engine';
 import { MAX_HABITS } from '../lib/schema';
-import { daysLeft, TRASH_DAYS } from '../lib/trash';
+import { daysLeft, isLive, liveHabits, TRASH_DAYS } from '../lib/trash';
 import { AREA_LABEL, XP_BY_DIFFICULTY, type Todo } from '../lib/types';
 import { useFx } from '../state/fx';
 import { useStore } from '../state/store';
@@ -36,9 +36,9 @@ export function Archive({ viewParam }: { viewParam?: string }) {
   };
 
   const counts: Record<ArchiveView, number> = {
-    paused: state.habits.filter((h) => h.archivedOn !== null).length,
+    paused: liveHabits(state).filter((h) => h.archivedOn !== null).length,
     deleted: state.trash.habits.length + state.trash.todos.length,
-    done: state.todos.filter((t) => t.doneOn).length,
+    done: state.todos.filter((t) => t.doneOn && isLive(t)).length,
   };
 
   return (
@@ -63,7 +63,7 @@ export function Archive({ viewParam }: { viewParam?: string }) {
 function PausedList() {
   const { state, dispatch, today } = useStore();
   const { toast, undoToast } = useFx();
-  const paused = state.habits.filter((h) => h.archivedOn !== null);
+  const paused = liveHabits(state).filter((h) => h.archivedOn !== null);
 
   if (paused.length === 0) return <p className="muted archive__empty">No paused habits. Pausing a habit hides it from Today and keeps its history.</p>;
 
@@ -72,7 +72,7 @@ function PausedList() {
     const what = ids.length === 1 ? 'the paused habit' : `all ${ids.length} paused habits`;
     if (!confirmAction(`Move ${what} to Recently deleted? You can restore ${ids.length === 1 ? 'it' : 'them'} for ${TRASH_DAYS} days.`)) return;
     dispatch({ type: 'deletePaused', day: today });
-    undoToast(ids.length === 1 ? `Deleted ${paused[0].name}` : `Deleted ${ids.length} paused habits`, () => dispatch({ type: 'restoreDeleted', habits: ids }));
+    undoToast(ids.length === 1 ? `Deleted ${paused[0].name}` : `Deleted ${ids.length} paused habits`, () => dispatch({ type: 'restoreDeleted', habits: ids, day: today }));
   };
 
   return (
@@ -91,7 +91,7 @@ function PausedList() {
                 type="button"
                 className="btn btn--tiny"
                 onClick={() => {
-                  dispatch({ type: 'restoreHabit', id: h.id });
+                  dispatch({ type: 'restoreHabit', id: h.id, day: today });
                   toast(`Resumed ${h.name}`, 'It is back on Today.');
                 }}
               >
@@ -103,7 +103,7 @@ function PausedList() {
                 onClick={() => {
                   if (!confirmDeleteHabit(h.name)) return;
                   dispatch({ type: 'deleteHabit', id: h.id, day: today });
-                  undoToast(`Deleted ${h.name}`, () => dispatch({ type: 'restoreDeleted', habits: [h.id] }));
+                  undoToast(`Deleted ${h.name}`, () => dispatch({ type: 'restoreDeleted', habits: [h.id], day: today }));
                 }}
               >
                 Delete
@@ -132,12 +132,19 @@ function DeletedList() {
   const { toast } = useFx();
 
   // Newest first. Within a day, the most recent deletion is last in each list, so reverse before sorting.
+  const habitsById = new Map(state.habits.map((h) => [h.id, h]));
+  const todosById = new Map(state.todos.map((t) => [t.id, t]));
   const rows: DeletedRow[] = [
-    ...state.trash.habits.map((d) => {
-      const days = Object.keys(d.logs).length;
-      return { kind: 'habit' as const, id: d.habit.id, name: d.habit.name, deletedOn: d.deletedOn, detail: `Habit, ${days} ${days === 1 ? 'day' : 'days'} of history` };
+    ...state.trash.habits.flatMap((d) => {
+      const h = habitsById.get(d.id);
+      if (!h) return [];
+      const days = Object.values(state.logs).filter((day) => d.id in day).length;
+      return [{ kind: 'habit' as const, id: d.id, name: h.name, deletedOn: d.deletedOn, detail: `Habit, ${days} ${days === 1 ? 'day' : 'days'} logged` }];
     }),
-    ...state.trash.todos.map((d) => ({ kind: 'todo' as const, id: d.todo.id, name: d.todo.name, deletedOn: d.deletedOn, detail: d.todo.doneOn ? 'To-do, done' : 'To-do' })),
+    ...state.trash.todos.flatMap((d) => {
+      const t = todosById.get(d.id);
+      return t ? [{ kind: 'todo' as const, id: d.id, name: t.name, deletedOn: d.deletedOn, detail: t.doneOn ? 'To-do, done' : 'To-do' }] : [];
+    }),
   ]
     .reverse()
     .sort((a, b) => b.deletedOn.localeCompare(a.deletedOn));
@@ -147,24 +154,24 @@ function DeletedList() {
   const ids = (row: DeletedRow) => (row.kind === 'habit' ? { habits: [row.id] } : { todos: [row.id] });
 
   const restore = (row: DeletedRow) => {
-    if (row.kind === 'habit' && state.habits.length >= MAX_HABITS) return toast("Can't restore", `You can keep up to ${MAX_HABITS} habits. Delete one first.`);
-    dispatch({ type: 'restoreDeleted', ...ids(row) });
-    toast(`Restored ${row.name}`, row.kind === 'habit' ? 'Its history and streaks are back.' : undefined);
+    if (row.kind === 'habit' && liveHabits(state).length >= MAX_HABITS) return toast("Can't restore", `You can keep up to ${MAX_HABITS} habits. Delete one first.`);
+    dispatch({ type: 'restoreDeleted', ...ids(row), day: today });
+    toast(`Restored ${row.name}`, row.kind === 'habit' ? 'It is back on Today.' : 'It is back on your to-dos.');
   };
 
   const remove = (row: DeletedRow) => {
-    if (!confirmAction(`Delete "${row.name}" for good? This can't be undone.`)) return;
+    if (!confirmAction(`Delete "${row.name}" for good? You won't be able to restore it. XP you already earned from it stays.`)) return;
     dispatch({ type: 'deleteForever', ...ids(row) });
   };
 
   const clearAll = () => {
-    if (!confirmAction(`Delete all ${rows.length} items in Recently deleted for good? This can't be undone.`)) return;
+    if (!confirmAction(`Delete all ${rows.length} items in Recently deleted for good? You won't be able to restore them. XP you already earned from them stays.`)) return;
     dispatch({ type: 'deleteForever' });
   };
 
   return (
     <>
-      <p className="muted archive__note">Deleted habits and to-dos stay here for {TRASH_DAYS} days, then they're removed for good.</p>
+      <p className="muted archive__note">You can restore deleted habits and to-dos for {TRASH_DAYS} days. XP you earned from them always stays.</p>
       <ul className="plain-list archive__list">
         {rows.map((row) => {
           const left = daysLeft(row.deletedOn, today);
@@ -204,7 +211,7 @@ function DoneList() {
   const [limit, setLimit] = useState(DONE_PAGE);
 
   const done = state.todos
-    .filter((t): t is Todo & { doneOn: DateKey } => t.doneOn !== null)
+    .filter((t): t is Todo & { doneOn: DateKey } => t.doneOn !== null && isLive(t))
     .map((t, i) => ({ t, i }))
     .sort((a, b) => (order === 'newest' ? b.t.doneOn.localeCompare(a.t.doneOn) : a.t.doneOn.localeCompare(b.t.doneOn)) || a.i - b.i)
     .map((x) => x.t);

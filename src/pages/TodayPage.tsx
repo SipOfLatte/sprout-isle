@@ -15,6 +15,7 @@ import { CheckInCard } from '../components/CheckInCard';
 import { CalendarButton, WeekStrip } from '../components/DayBrowser';
 import { diffDays, formatLong, type DateKey } from '../lib/dates';
 import { openDay } from '../lib/nav';
+import { isLive, liveHabits } from '../lib/trash';
 import { dayTally, isActiveOn, isDueOn } from '../lib/engine';
 import { XP_BY_DIFFICULTY, type Difficulty, type Habit, type Todo } from '../lib/types';
 import { confirmAction } from '../components/Dialog';
@@ -45,7 +46,7 @@ export function TodayPage({ dayParam, onNavigate }: { dayParam?: string; onNavig
   const editable = daysBack <= MAX_BACKFILL_DAYS;
   const usedFreeze = progress.freezeDays.includes(viewDay);
 
-  const active = state.habits.filter((h) => isActiveOn(h, viewDay));
+  const active = liveHabits(state).filter((h) => isActiveOn(h, viewDay));
   const due = active.filter((h) => isDueOn(h, viewDay));
   const other = active.filter((h) => !isDueOn(h, viewDay));
   const tally = dayTally(state, viewDay);
@@ -103,7 +104,7 @@ export function TodayPage({ dayParam, onNavigate }: { dayParam?: string; onNavig
           </p>
         )}
 
-        {state.habits.length === 0 ? (
+        {liveHabits(state).length === 0 ? (
           <div className="empty">
             <h2>Plant your first habit</h2>
             <p>Pick a starter or make your own. Each one you finish grows part of your island.</p>
@@ -167,14 +168,14 @@ function Todos({ day, readOnly }: { day: DateKey; readOnly: boolean }) {
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const visible = state.todos.filter((t) => (t.doneOn ? t.doneOn === day : t.createdOn <= day));
+  const visible = state.todos.filter((t) => isLive(t) && (t.doneOn ? t.doneOn === day : t.createdOn <= day));
 
   const remove = (t: Todo) => {
-    if (!confirmAction(`Delete "${t.name}"? It moves to Recently deleted on the You tab, where you can restore it for 7 days.`)) return;
+    if (!confirmAction(`Delete "${t.name}"?${t.doneOn ? ' Its XP stays.' : ''} You can restore it from Recently deleted on the You tab for 7 days.`)) return;
     dispatch({ type: 'deleteTodo', id: t.id, day: today });
-    undoToast(`Deleted ${t.name}`, () => dispatch({ type: 'restoreDeleted', todos: [t.id] }));
+    undoToast(`Deleted ${t.name}`, () => dispatch({ type: 'restoreDeleted', todos: [t.id], day: today }));
   };
-  const doneCount = state.todos.filter((t) => t.doneOn).length;
+  const doneCount = state.todos.filter((t) => t.doneOn && isLive(t)).length;
 
   const add = (e: FormEvent) => {
     e.preventDefault();

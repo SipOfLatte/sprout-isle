@@ -14,7 +14,7 @@ To look around without tracking anything yourself, open the You tab and choose L
 
 A habit can be yes or no, or an amount like 8 glasses of water. It can repeat every day, on chosen weekdays, or a set number of times a week, and you can edit, pause or delete it whenever you like. There's also a to-do list for chores and one-off tasks, which earn XP by effort without belonging to a part of life. You can drag habits and to-dos into whatever order you like.
 
-Mistakes are easy to take back. Deleting or pausing something shows an Undo button for 5 seconds. Deleted habits and to-dos wait in Recently deleted on the You tab for 7 days, and restoring a habit brings back its whole history, so streaks, XP and charts return as they were. The same place lists paused habits and every finished to-do, grouped by day.
+XP you've earned is yours to keep. Deleting a habit or a finished to-do hides it but never takes XP, streaks or past totals away. Deleting or pausing shows an Undo button for 5 seconds, and deleted items can be restored from Recently deleted on the You tab for 7 days. When you resume or restore a habit, the days it was off don't count as missed. The same place lists paused habits and every finished to-do, grouped by day.
 
 The week strip and calendar on Today open any past day. You can still tick things off for the last seven days. Older days are read-only so streaks stay honest.
 
@@ -73,7 +73,7 @@ Sync is optional. It keeps devices in step through a secret gist in your own Git
 
 ## How the data works
 
-The app stores only what you enter: habits, the amount logged each day, to-dos, check-ins, purchases and where you placed things, plus the quests and boss picked at the start of each week. XP, levels, streaks, quest progress, boss damage and all the charts are worked out from those records every time they're needed. If you edit a past day, everything that depends on it updates, and there are no running totals to fall out of step.
+The app stores only what you enter: habits, the amount logged each day, to-dos, check-ins, purchases and where you placed things, plus the quests and boss picked at the start of each week. XP, levels, streaks, quest progress, boss damage and all the charts are worked out from those records every time they're needed. If you edit a past day, everything that depends on it updates, and there are no running totals to fall out of step. Deleted habits stay in the data with a deleted date, so their past check-ins still count toward XP and the Insights totals, while the habit-by-habit charts leave them out.
 
 | Module | What's in it |
 |---|---|
@@ -85,7 +85,7 @@ The app stores only what you enter: habits, the amount logged each day, to-dos, 
 | [`src/lib/bosses.ts`](src/lib/bosses.ts) | Boss HP, damage, wins and loot |
 | [`src/lib/pets.ts`](src/lib/pets.ts) | Companion growth and mood |
 | [`src/lib/catalog.ts`](src/lib/catalog.ts) | Store items, boss details and the spots on the island |
-| [`src/lib/trash.ts`](src/lib/trash.ts) | Recently deleted: moving habits with their logs out and back in place, and clearing items after 7 days |
+| [`src/lib/trash.ts`](src/lib/trash.ts) | Deleting, restoring and resuming: hidden items keep counting, the 7-day restore list, and breaks for days off |
 | [`src/lib/schema.ts`](src/lib/schema.ts) | The zod schema that anything loaded from storage, a backup or a gist has to pass |
 | [`src/sync/`](src/sync) | The gist client and the logic that decides whether to upload, download or ask |
 | [`src/world/`](src/world) | Pixel sprites and the island scene builder |

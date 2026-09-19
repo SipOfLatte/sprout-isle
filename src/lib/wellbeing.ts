@@ -2,7 +2,7 @@
 // worse days (same day and the day after), and completion vs mood.
 // All of this is observational. The UI says so, and shows sample sizes.
 
-import { dailySeries, habitsFor, rollingMean, type AreaFilter } from './analytics';
+import { dailySeries, listedHabitsFor, rollingMean, type AreaFilter } from './analytics';
 import { addDays, minKey, range, weekday, type DateKey } from './dates';
 import { amountOn, isActiveOn, isDone, isPinnedTo } from './engine';
 import { linearFit, mean, welchInterval, type LinearFit, type MeanDifference } from './stats';
@@ -91,7 +91,7 @@ export function habitEffects(state: AppState, today: DateKey, measure: Measure, 
   const days = range(addDays(today, -lookback + 1), today);
   // Next-day effects can't use today, whose "tomorrow" hasn't happened.
   const lagDays = days.slice(0, -1);
-  return habitsFor(state, area)
+  return listedHabitsFor(state, area)
     .filter((h) => days.some((d) => isActiveOn(h, d)))
     .map((habit) => ({
       habit,

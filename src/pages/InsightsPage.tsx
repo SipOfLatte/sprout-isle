@@ -68,7 +68,8 @@ export function InsightsPage({ viewParam }: { viewParam?: string }) {
       previous: summarize(state, progress, prevSlice, today, area),
       points: extended.slice(6),
       avg,
-      rates: habitRates(state, period.start, period.end, today, area),
+      // Deleted habits still count in the totals but aren't listed one by one.
+      rates: habitRates(state, period.start, period.end, today, area).filter((r) => !r.habit.deletedOn),
       grid: habitGrid(state, period.start, period.end, today, area),
       xp: xpSeries(progress, period.start, period.end).map((p) =>
         area === 'all' ? p : { ...p, health: area === 'health' ? p.health : 0, work: area === 'work' ? p.work : 0, bonus: 0 },

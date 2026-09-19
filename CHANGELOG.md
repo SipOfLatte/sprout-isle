@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.9.0 (2026-09-19)
+
+### Changed
+- XP you've earned now stays when you delete something. Deleting a habit hides it but keeps its check-ins, so your level, streaks, perfect days and the Insights totals don't drop. The same goes for finished to-dos.
+- Delete forever and the 7-day limit now only stop you restoring an item. What you earned from it stays.
+- Deleted habits no longer appear in the habit-by-habit charts in Insights.
+- Deleting or pausing a habit you already did today keeps today's XP.
+
+### Fixed
+- Resuming a paused habit, or restoring a deleted one, no longer counts the days it was off as missed. Before, this could break a streak or take away perfect days.
+- Items deleted in 2.8.0 are moved back in as hidden items with their history, so the XP they took away comes back.
+
 ## 2.8.0 (2026-09-19)
 
 ### Added

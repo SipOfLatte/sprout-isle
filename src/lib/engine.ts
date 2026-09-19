@@ -16,7 +16,8 @@ export const XP_PER_COIN = 5;
 export const CHECKIN_BONUS = 5;
 
 export function isActiveOn(habit: Habit, day: DateKey): boolean {
-  return habit.createdOn <= day && (habit.archivedOn === null || day < habit.archivedOn);
+  if (habit.createdOn > day || (habit.archivedOn !== null && day >= habit.archivedOn)) return false;
+  return !habit.breaks?.some((b) => b.from <= day && day <= b.to);
 }
 
 /** Habits pinned to a day (daily or chosen weekdays). Weekly habits float. */

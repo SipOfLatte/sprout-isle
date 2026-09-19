@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import { WEEKDAY_SHORT } from '../lib/dates';
 import { newId } from '../lib/storage';
 import { MAX_HABITS } from '../lib/schema';
+import { liveHabits } from '../lib/trash';
 import { AREA_LABEL, XP_BY_DIFFICULTY, type Area, type Difficulty, type Habit, type Schedule } from '../lib/types';
 import { useFx } from '../state/fx';
 import { useStore } from '../state/store';
@@ -11,7 +12,7 @@ import { confirmAction, Dialog } from './Dialog';
 
 /** Shared by the editor and the Paused list so both ask the same question. */
 export function confirmDeleteHabit(name: string): boolean {
-  return confirmAction(`Delete "${name}"? It moves to Recently deleted on the You tab, where you can restore it with its history for 7 days.`);
+  return confirmAction(`Delete "${name}"? XP you earned from it stays. You can restore it from Recently deleted on the You tab for 7 days.`);
 }
 
 export type HabitDraft = Partial<Pick<Habit, 'name' | 'area' | 'schedule' | 'target' | 'unit' | 'difficulty'>>;
@@ -59,7 +60,7 @@ function HabitForm({ habit, preset, onClose }: { habit: Habit | null; preset?: H
     if (measured && (!Number.isInteger(targetNum) || targetNum < 2 || targetNum > 10_000))
       return setError('Set a daily amount between 2 and 10,000.');
     if (kind === 'weekdays' && days.length === 0) return setError('Pick at least one day.');
-    if (!habit && state.habits.length >= MAX_HABITS) return setError(`You can keep up to ${MAX_HABITS} habits.`);
+    if (!habit && liveHabits(state).length >= MAX_HABITS) return setError(`You can keep up to ${MAX_HABITS} habits.`);
 
     const schedule: Schedule =
       kind === 'daily' ? { kind } : kind === 'weekdays' ? { kind, days: [...days].sort() } : { kind, times };
@@ -76,6 +77,8 @@ function HabitForm({ habit, preset, onClose }: { habit: Habit | null; preset?: H
         difficulty,
         createdOn: habit?.createdOn ?? today,
         archivedOn: habit?.archivedOn ?? null,
+        deletedOn: habit?.deletedOn ?? null,
+        breaks: habit?.breaks ?? [],
       },
     });
     onClose();
@@ -84,7 +87,7 @@ function HabitForm({ habit, preset, onClose }: { habit: Habit | null; preset?: H
   const archive = () => {
     if (!habit) return;
     dispatch({ type: 'archiveHabit', id: habit.id, day: today });
-    undoToast(`Paused ${habit.name}`, () => dispatch({ type: 'restoreHabit', id: habit.id }), 'Find it on the You tab.');
+    undoToast(`Paused ${habit.name}`, () => dispatch({ type: 'restoreHabit', id: habit.id, day: today }), 'Find it on the You tab.');
     onClose();
   };
 
@@ -92,7 +95,7 @@ function HabitForm({ habit, preset, onClose }: { habit: Habit | null; preset?: H
     if (!habit) return;
     if (!confirmDeleteHabit(habit.name)) return;
     dispatch({ type: 'deleteHabit', id: habit.id, day: today });
-    undoToast(`Deleted ${habit.name}`, () => dispatch({ type: 'restoreDeleted', habits: [habit.id] }));
+    undoToast(`Deleted ${habit.name}`, () => dispatch({ type: 'restoreDeleted', habits: [habit.id], day: today }));
     onClose();
   };
 

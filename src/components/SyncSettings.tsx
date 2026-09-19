@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import type { AppState } from '../lib/types';
 import { useSync } from '../sync/SyncProvider';
+import { liveHabits } from '../lib/trash';
 import { confirmAction } from './Dialog';
 
 const TOKEN_URL = 'https://github.com/settings/personal-access-tokens/new';
@@ -11,7 +12,7 @@ const TOKEN_URL = 'https://github.com/settings/personal-access-tokens/new';
 function describe(s: AppState) {
   const logged = Object.keys(s.logs).length;
   const when = s.updatedAt ? new Date(s.updatedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : 'never';
-  return `${s.habits.length} habits, ${logged} days logged, last changed ${when}`;
+  return `${liveHabits(s).length} habits, ${logged} days logged, last changed ${when}`;
 }
 
 export function SyncSettings() {

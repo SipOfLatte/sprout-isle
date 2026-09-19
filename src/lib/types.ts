@@ -20,7 +20,18 @@ export interface Habit {
   unit: string;
   difficulty: Difficulty;
   createdOn: DateKey;
+  /** First day it's no longer due, when paused or deleted. */
   archivedOn: DateKey | null;
+  /** Set when deleted. The habit is hidden but its check-ins keep counting. */
+  deletedOn?: DateKey | null;
+  /** Past pauses (and restored deletions), so days off never count as missed after you resume. */
+  breaks?: HabitBreak[];
+}
+
+/** Days a habit was paused or deleted, from `from` to `to` inclusive. */
+export interface HabitBreak {
+  from: DateKey;
+  to: DateKey;
 }
 
 export interface Todo {
@@ -31,6 +42,8 @@ export interface Todo {
   difficulty: Difficulty;
   createdOn: DateKey;
   doneOn: DateKey | null;
+  /** Set when deleted. A finished one keeps its XP. */
+  deletedOn?: DateKey | null;
 }
 
 export interface Reward {
@@ -90,22 +103,20 @@ export interface CheckIn {
   energy: number | null;
 }
 
-/** A habit in Recently deleted, kept with its history so restoring brings its streaks and charts back. */
+/** An entry on the Recently deleted list. The habit itself stays in `habits` with `deletedOn` set. */
 export interface DeletedHabit {
-  habit: Habit;
-  /** logs[date] = amount, taken out of the main logs when the habit was deleted. */
-  logs: Record<DateKey, number>;
+  id: string;
   deletedOn: DateKey;
-  /** Position in the habit list when deleted, so a restore puts it back in place. */
-  index: number;
+  /** Its pause date before it was deleted, put back on restore. */
+  archivedOn: DateKey | null;
 }
 
 export interface DeletedTodo {
-  todo: Todo;
+  id: string;
   deletedOn: DateKey;
-  index: number;
 }
 
+/** What can still be restored. Entries leave after 7 days. */
 export interface Trash {
   habits: DeletedHabit[];
   todos: DeletedTodo[];

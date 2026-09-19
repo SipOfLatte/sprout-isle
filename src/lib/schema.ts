@@ -2,7 +2,7 @@
 // against this schema, with size limits, before it reaches the app.
 
 import { z } from 'zod';
-import { MAX_TRASH } from './trash';
+import { MAX_TRASH, upgradeTrash, type LegacyTrash } from './trash';
 import type { AppState } from './types';
 
 const dateKey = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
@@ -37,28 +37,38 @@ const habit = z.object({
   difficulty,
   createdOn: dateKey,
   archivedOn: dateKey.nullable(),
+  deletedOn: dateKey.nullable().default(null),
+  breaks: z.array(z.object({ from: dateKey, to: dateKey })).max(500).default([]),
 });
 
-const todo = z.object({ id, name, area: area.nullable().default(null), difficulty, createdOn: dateKey, doneOn: dateKey.nullable() });
+const todo = z.object({ id, name, area: area.nullable().default(null), difficulty, createdOn: dateKey, doneOn: dateKey.nullable(), deletedOn: dateKey.nullable().default(null) });
 
 const position = z.number().int().min(0).max(10_000);
 
+// 2.8.0 kept whole deleted items in the trash. Those still load and are moved back by upgradeTrash.
 const trash = z.object({
   habits: z
-    .array(z.object({ habit, logs: z.record(dateKey, z.number().int().min(0).max(10_000)), deletedOn: dateKey, index: position }))
+    .array(
+      z.union([
+        z.object({ id, deletedOn: dateKey, archivedOn: dateKey.nullable() }),
+        z.object({ habit, logs: z.record(dateKey, z.number().int().min(0).max(10_000)), deletedOn: dateKey, index: position }),
+      ]),
+    )
     .max(MAX_TRASH.habits),
-  todos: z.array(z.object({ todo, deletedOn: dateKey, index: position })).max(MAX_TRASH.todos),
+  todos: z.array(z.union([z.object({ id, deletedOn: dateKey }), z.object({ todo, deletedOn: dateKey, index: position })])).max(MAX_TRASH.todos),
 });
 
 const slug = z.string().min(1).max(40).regex(/^[a-z0-9-]+$/);
 
+/** Habits you can have at once. Deleted habits stay stored so their XP counts, under a higher cap. */
 export const MAX_HABITS = 100;
+const MAX_STORED_HABITS = 2_000;
 export const LIMITS = { importBytes: 5_000_000 };
 
 export const stateSchema = z.object({
   version: z.literal(1),
   worldName: z.string().trim().min(1).max(40),
-  habits: z.array(habit).max(MAX_HABITS),
+  habits: z.array(habit).max(MAX_STORED_HABITS),
   todos: z.array(todo).max(5_000),
   rewards: z.array(z.object({ id, name, cost: z.number().int().min(1).max(100_000) })).max(200),
   redemptions: z
@@ -86,5 +96,7 @@ export const stateSchema = z.object({
 
 export function parseState(input: unknown): AppState | null {
   const result = stateSchema.safeParse(input);
-  return result.success ? (result.data as AppState) : null;
+  if (!result.success) return null;
+  const { trash, ...rest } = result.data;
+  return upgradeTrash(rest as Omit<AppState, 'trash'>, trash as LegacyTrash);
 }

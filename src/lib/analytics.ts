@@ -50,8 +50,14 @@ export function shiftPeriod(p: Period, dir: -1 | 1): Period {
   return periodFor(p.kind, anchor);
 }
 
+/** Every habit in an area, deleted ones included, for totals that should match your XP and history. */
 export function habitsFor(state: AppState, area: AreaFilter): Habit[] {
   return state.habits.filter((h) => area === 'all' || h.area === area);
+}
+
+/** Habits to list one by one in charts. Deleted habits are left out. */
+export function listedHabitsFor(state: AppState, area: AreaFilter): Habit[] {
+  return habitsFor(state, area).filter((h) => !h.deletedOn);
 }
 
 /** Partial credit: 5 of 8 glasses scores 0.625. */
@@ -173,7 +179,7 @@ export function habitGrid(
   area: AreaFilter,
 ): { habit: Habit; cells: GridCell[] }[] {
   const days = range(start, end);
-  return habitsFor(state, area)
+  return listedHabitsFor(state, area)
     .filter((h) => days.some((d) => isActiveOn(h, d)))
     .map((habit) => ({
       habit,
@@ -281,7 +287,7 @@ export interface CorrelationResult {
 export function correlations(state: AppState, today: DateKey, days: number, area: AreaFilter): CorrelationResult {
   const from = addDays(today, -days + 1);
   const window = range(from, today);
-  const habits = habitsFor(state, area).filter((h) => window.some((d) => isActiveOn(h, d)));
+  const habits = listedHabitsFor(state, area).filter((h) => window.some((d) => isActiveOn(h, d)));
 
   const expectedOn = (h: Habit, d: DateKey) => (h.schedule.kind === 'weekly' ? isActiveOn(h, d) : isPinnedTo(h, d));
   const doneOn = (h: Habit, d: DateKey) => (isDone(h, amountOn(state, h.id, d)) ? 1 : 0);

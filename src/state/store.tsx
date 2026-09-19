@@ -11,21 +11,21 @@ import { reorderSubset } from '../lib/order';
 import { pruneQuests, questRewards, questsToGenerate } from '../lib/quests';
 import { MAX_HABITS } from '../lib/schema';
 import { loadState, newId, saveState } from '../lib/storage';
-import { purgeTrash, pruneTrash, restoreFromTrash, trashHabits, trashTodo } from '../lib/trash';
+import { liveHabits, purgeTrash, pruneTrash, restoreFromTrash, resumeHabit, stopDay, trashHabits, trashTodo } from '../lib/trash';
 import type { AppState, Boss, Difficulty, Habit, Quest, Reward, Species } from '../lib/types';
 
 export type Action =
   | { type: 'setAmount'; habitId: string; day: DateKey; amount: number }
   | { type: 'saveHabit'; habit: Habit }
   | { type: 'archiveHabit'; id: string; day: DateKey }
-  | { type: 'restoreHabit'; id: string }
+  | { type: 'restoreHabit'; id: string; day: DateKey }
   | { type: 'deleteHabit'; id: string; day: DateKey }
   /** Moves every paused habit into Recently deleted. */
   | { type: 'deletePaused'; day: DateKey }
   | { type: 'addTodo'; name: string; difficulty: Difficulty; day: DateKey }
   | { type: 'toggleTodo'; id: string; day: DateKey }
   | { type: 'deleteTodo'; id: string; day: DateKey }
-  | { type: 'restoreDeleted'; habits?: string[]; todos?: string[] }
+  | { type: 'restoreDeleted'; habits?: string[]; todos?: string[]; day: DateKey }
   /** Removes items from Recently deleted for good. With no ids, it clears the whole list. */
   | { type: 'deleteForever'; habits?: string[]; todos?: string[] }
   | { type: 'pruneTrash'; today: DateKey }
@@ -58,8 +58,7 @@ function reducer(state: AppState, action: Action): AppState {
   }
   // Clearing out old deletions is the same on every device, so it isn't a user edit either.
   if (action.type === 'pruneTrash') {
-    const trash = pruneTrash(state.trash, action.today);
-    return trash === state.trash ? state : { ...state, trash };
+    return pruneTrash(state, action.today);
   }
   const next = apply(state, action);
   return next === state ? state : { ...next, updatedAt: Date.now() };
@@ -82,17 +81,18 @@ function apply(state: AppState, action: Exclude<Action, { type: 'replace' | 'set
         : [...state.habits, action.habit];
       return { ...state, habits };
     }
+    // Pausing on a day you already did the habit keeps that day, so its XP stays.
     case 'archiveHabit':
-      return { ...state, habits: state.habits.map((h) => (h.id === action.id ? { ...h, archivedOn: action.day } : h)) };
+      return { ...state, habits: state.habits.map((h) => (h.id === action.id ? { ...h, archivedOn: stopDay(state, h, action.day) } : h)) };
     case 'restoreHabit':
-      return { ...state, habits: state.habits.map((h) => (h.id === action.id ? { ...h, archivedOn: null } : h)) };
-    // Deleting moves the habit and its history into Recently deleted, where it can be restored for 7 days.
+      return { ...state, habits: state.habits.map((h) => (h.id === action.id && h.archivedOn !== null ? resumeHabit(h, action.day) : h)) };
+    // Deleting hides the habit but keeps its check-ins, so earned XP stays. It can be restored for 7 days.
     case 'deleteHabit':
       return trashHabits(state, [action.id], action.day);
     case 'deletePaused':
-      return trashHabits(state, state.habits.filter((h) => h.archivedOn !== null).map((h) => h.id), action.day);
+      return trashHabits(state, liveHabits(state).filter((h) => h.archivedOn !== null).map((h) => h.id), action.day);
     case 'restoreDeleted':
-      return restoreFromTrash(state, action, MAX_HABITS);
+      return restoreFromTrash(state, action, MAX_HABITS, action.day);
     case 'deleteForever':
       return purgeTrash(state, action.habits || action.todos ? action : undefined);
     case 'addTodo':
