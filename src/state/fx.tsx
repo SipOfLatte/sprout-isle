@@ -15,13 +15,19 @@ interface Toast {
   id: number;
   title: string;
   body?: string;
+  undo?: () => void;
 }
+
+/** How long a toast with an Undo button stays up. */
+export const UNDO_MS = 5000;
 
 interface Fx {
   launchSeed: (from: HTMLElement, area: SeedKind) => void;
   registerIsle: (svg: SVGSVGElement | null) => void;
   landed: { area: SeedKind; id: number } | null;
   toast: (title: string, body?: string) => void;
+  /** A toast with an Undo button that stays for UNDO_MS. */
+  undoToast: (title: string, undo: () => void, body?: string) => void;
 }
 
 const FxContext = createContext<Fx | null>(null);
@@ -71,13 +77,22 @@ export function FxProvider({ children }: { children: ReactNode }) {
     setLanded({ area: seed.area, id: seed.id });
   }, []);
 
-  const toast = useCallback((title: string, body?: string) => {
-    const id = nextId++;
-    setToasts((t) => [...t.slice(-2), { id, title, body }]);
-    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 4200);
-  }, []);
+  const dismiss = useCallback((id: number) => setToasts((t) => t.filter((x) => x.id !== id)), []);
 
-  const value = useMemo(() => ({ launchSeed, registerIsle, landed, toast }), [launchSeed, registerIsle, landed, toast]);
+  const show = useCallback(
+    (toast: Omit<Toast, 'id'>, ms: number) => {
+      const id = nextId++;
+      // Only the latest action can be undone, so a new Undo toast replaces any older one.
+      setToasts((t) => [...t.filter((x) => !(toast.undo && x.undo)).slice(-2), { id, ...toast }]);
+      setTimeout(() => dismiss(id), ms);
+    },
+    [dismiss],
+  );
+
+  const toast = useCallback((title: string, body?: string) => show({ title, body }, 4200), [show]);
+  const undoToast = useCallback((title: string, undo: () => void, body?: string) => show({ title, body, undo }, UNDO_MS), [show]);
+
+  const value = useMemo(() => ({ launchSeed, registerIsle, landed, toast, undoToast }), [launchSeed, registerIsle, landed, toast, undoToast]);
 
   return (
     <FxContext.Provider value={value}>
@@ -89,9 +104,23 @@ export function FxProvider({ children }: { children: ReactNode }) {
       </div>
       <div className="toasts" role="status" aria-live="polite">
         {toasts.map((t) => (
-          <div className="toast" key={t.id}>
-            <strong>{t.title}</strong>
-            {t.body && <span>{t.body}</span>}
+          <div className={`toast${t.undo ? ' toast--undo' : ''}`} key={t.id}>
+            <div className="toast__text">
+              <strong>{t.title}</strong>
+              {t.body && <span>{t.body}</span>}
+            </div>
+            {t.undo && (
+              <button
+                type="button"
+                className="btn btn--tiny"
+                onClick={() => {
+                  t.undo?.();
+                  dismiss(t.id);
+                }}
+              >
+                Undo
+              </button>
+            )}
           </div>
         ))}
       </div>

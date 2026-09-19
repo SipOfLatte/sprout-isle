@@ -1,29 +1,27 @@
-// The You tab: stats, achievements, paused habits, sync, and backup, import and reset tools.
+// The You tab: stats, achievements, paused, deleted and done lists, sync, and backup, import and reset tools.
 
 import { useRef, useState, type ChangeEvent } from 'react';
+import { Archive } from '../components/Archive';
 import { confirmAction } from '../components/Dialog';
 import { Icon } from '../components/Icon';
 import { SyncSettings } from '../components/SyncSettings';
 import { achievementStatuses, closestToUnlock } from '../lib/achievements';
 import { downloadText } from '../lib/csv';
-import { formatShort } from '../lib/dates';
-import { levelInfo, scheduleLabel } from '../lib/engine';
+import { levelInfo } from '../lib/engine';
 import { sampleState } from '../lib/sample';
 import { LIMITS, parseState } from '../lib/schema';
 import { emptyState } from '../lib/storage';
-import { AREA_LABEL } from '../lib/types';
 import { useFx } from '../state/fx';
 import { useStore } from '../state/store';
 import { useSync } from '../sync/SyncProvider';
 
-export function MePage() {
+export function MePage({ viewParam }: { viewParam?: string }) {
   const { state, dispatch, progress, today } = useStore();
   const { toast } = useFx();
   const sync = useSync();
   const fileRef = useRef<HTMLInputElement>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const lvl = levelInfo(progress.totalXp);
-  const archived = state.habits.filter((h) => h.archivedOn !== null);
 
   // Achievements start collapsed to the few closest to unlocking, so the list isn't a long scroll on phones.
   const [showAll, setShowAll] = useState(false);
@@ -159,26 +157,7 @@ export function MePage() {
         </button>
       </section>
 
-      {archived.length > 0 && (
-        <section aria-labelledby="paused-title">
-          <h2 id="paused-title">Paused habits</h2>
-          <ul className="plain-list">
-            {archived.map((h) => (
-              <li key={h.id}>
-                <div>
-                  <strong>{h.name}</strong>
-                  <span className="muted">
-                    {AREA_LABEL[h.area]}, {scheduleLabel(h)}, paused {formatShort(h.archivedOn!)}
-                  </span>
-                </div>
-                <button type="button" className="btn btn--tiny" onClick={() => dispatch({ type: 'restoreHabit', id: h.id })}>
-                  Resume
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <Archive viewParam={viewParam} />
 
       <SyncSettings />
 

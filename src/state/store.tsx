@@ -9,7 +9,9 @@ import { ITEMS_BY_ID, SLOTS, slotAccepts } from '../lib/catalog';
 import { startOfWeek } from '../lib/dates';
 import { reorderSubset } from '../lib/order';
 import { pruneQuests, questRewards, questsToGenerate } from '../lib/quests';
+import { MAX_HABITS } from '../lib/schema';
 import { loadState, newId, saveState } from '../lib/storage';
+import { purgeTrash, pruneTrash, restoreFromTrash, trashHabits, trashTodo } from '../lib/trash';
 import type { AppState, Boss, Difficulty, Habit, Quest, Reward, Species } from '../lib/types';
 
 export type Action =
@@ -17,10 +19,16 @@ export type Action =
   | { type: 'saveHabit'; habit: Habit }
   | { type: 'archiveHabit'; id: string; day: DateKey }
   | { type: 'restoreHabit'; id: string }
-  | { type: 'deleteHabit'; id: string }
+  | { type: 'deleteHabit'; id: string; day: DateKey }
+  /** Moves every paused habit into Recently deleted. */
+  | { type: 'deletePaused'; day: DateKey }
   | { type: 'addTodo'; name: string; difficulty: Difficulty; day: DateKey }
   | { type: 'toggleTodo'; id: string; day: DateKey }
-  | { type: 'deleteTodo'; id: string }
+  | { type: 'deleteTodo'; id: string; day: DateKey }
+  | { type: 'restoreDeleted'; habits?: string[]; todos?: string[] }
+  /** Removes items from Recently deleted for good. With no ids, it clears the whole list. */
+  | { type: 'deleteForever'; habits?: string[]; todos?: string[] }
+  | { type: 'pruneTrash'; today: DateKey }
   | { type: 'reorderHabits'; ids: string[] }
   | { type: 'reorderTodos'; ids: string[] }
   | { type: 'saveReward'; reward: Reward }
@@ -48,11 +56,16 @@ function reducer(state: AppState, action: Action): AppState {
   if (action.type === 'setBoss') {
     return { ...state, bosses: pruneBosses({ ...state.bosses, [action.weekStart]: action.boss }) };
   }
+  // Clearing out old deletions is the same on every device, so it isn't a user edit either.
+  if (action.type === 'pruneTrash') {
+    const trash = pruneTrash(state.trash, action.today);
+    return trash === state.trash ? state : { ...state, trash };
+  }
   const next = apply(state, action);
   return next === state ? state : { ...next, updatedAt: Date.now() };
 }
 
-function apply(state: AppState, action: Exclude<Action, { type: 'replace' | 'setQuests' | 'setBoss' }>): AppState {
+function apply(state: AppState, action: Exclude<Action, { type: 'replace' | 'setQuests' | 'setBoss' | 'pruneTrash' }>): AppState {
   switch (action.type) {
     case 'setAmount': {
       const day = { ...(state.logs[action.day] ?? {}) };
@@ -73,15 +86,15 @@ function apply(state: AppState, action: Exclude<Action, { type: 'replace' | 'set
       return { ...state, habits: state.habits.map((h) => (h.id === action.id ? { ...h, archivedOn: action.day } : h)) };
     case 'restoreHabit':
       return { ...state, habits: state.habits.map((h) => (h.id === action.id ? { ...h, archivedOn: null } : h)) };
-    // Deleting also removes the habit's history. Pausing (archiveHabit) is the non-destructive option.
-    case 'deleteHabit': {
-      const logs: AppState['logs'] = {};
-      for (const [day, entries] of Object.entries(state.logs)) {
-        const rest = Object.fromEntries(Object.entries(entries).filter(([id]) => id !== action.id));
-        if (Object.keys(rest).length) logs[day] = rest;
-      }
-      return { ...state, habits: state.habits.filter((h) => h.id !== action.id), logs };
-    }
+    // Deleting moves the habit and its history into Recently deleted, where it can be restored for 7 days.
+    case 'deleteHabit':
+      return trashHabits(state, [action.id], action.day);
+    case 'deletePaused':
+      return trashHabits(state, state.habits.filter((h) => h.archivedOn !== null).map((h) => h.id), action.day);
+    case 'restoreDeleted':
+      return restoreFromTrash(state, action, MAX_HABITS);
+    case 'deleteForever':
+      return purgeTrash(state, action.habits || action.todos ? action : undefined);
     case 'addTodo':
       return {
         ...state,
@@ -101,7 +114,7 @@ function apply(state: AppState, action: Exclude<Action, { type: 'replace' | 'set
     case 'reorderTodos':
       return { ...state, todos: reorderSubset(state.todos, action.ids) };
     case 'deleteTodo':
-      return { ...state, todos: state.todos.filter((t) => t.id !== action.id) };
+      return trashTodo(state, action.id, action.day);
     case 'saveReward': {
       const exists = state.rewards.some((r) => r.id === action.reward.id);
       return {
@@ -214,6 +227,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (boss) dispatch({ type: 'setBoss', weekStart, boss });
     }
   }, [state, today]);
+
+  // Recently deleted keeps items for 7 days. The reducer ignores this when nothing has expired.
+  useEffect(() => {
+    dispatch({ type: 'pruneTrash', today });
+  }, [state.trash, today]);
 
   const { progress, loot } = useMemo(() => {
     const bosses = bossOutcomes(state, today);

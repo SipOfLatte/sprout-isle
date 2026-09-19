@@ -5,8 +5,14 @@ import { WEEKDAY_SHORT } from '../lib/dates';
 import { newId } from '../lib/storage';
 import { MAX_HABITS } from '../lib/schema';
 import { AREA_LABEL, XP_BY_DIFFICULTY, type Area, type Difficulty, type Habit, type Schedule } from '../lib/types';
+import { useFx } from '../state/fx';
 import { useStore } from '../state/store';
 import { confirmAction, Dialog } from './Dialog';
+
+/** Shared by the editor and the Paused list so both ask the same question. */
+export function confirmDeleteHabit(name: string): boolean {
+  return confirmAction(`Delete "${name}"? It moves to Recently deleted on the You tab, where you can restore it with its history for 7 days.`);
+}
 
 export type HabitDraft = Partial<Pick<Habit, 'name' | 'area' | 'schedule' | 'target' | 'unit' | 'difficulty'>>;
 
@@ -30,6 +36,7 @@ export function HabitEditor({
 
 function HabitForm({ habit, preset, onClose }: { habit: Habit | null; preset?: HabitDraft; onClose: () => void }) {
   const { state, dispatch, today } = useStore();
+  const { undoToast } = useFx();
   const init = habit ?? preset ?? {};
 
   const [name, setName] = useState(init.name ?? '');
@@ -77,13 +84,15 @@ function HabitForm({ habit, preset, onClose }: { habit: Habit | null; preset?: H
   const archive = () => {
     if (!habit) return;
     dispatch({ type: 'archiveHabit', id: habit.id, day: today });
+    undoToast(`Paused ${habit.name}`, () => dispatch({ type: 'restoreHabit', id: habit.id }), 'Find it on the You tab.');
     onClose();
   };
 
   const remove = () => {
     if (!habit) return;
-    if (!confirmAction(`Delete "${habit.name}" and all of its history? This can't be undone. Pausing keeps the history instead.`)) return;
-    dispatch({ type: 'deleteHabit', id: habit.id });
+    if (!confirmDeleteHabit(habit.name)) return;
+    dispatch({ type: 'deleteHabit', id: habit.id, day: today });
+    undoToast(`Deleted ${habit.name}`, () => dispatch({ type: 'restoreDeleted', habits: [habit.id] }));
     onClose();
   };
 

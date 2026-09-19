@@ -110,6 +110,7 @@ export function sampleState(today: DateKey, days = 90): AppState {
       { id: newId(), itemId: 'campfire', cost: 45, on: addDays(today, -6) },
     ],
     checkins,
+    trash: { habits: [], todos: [] },
     placements: { 'ground-2': 'well', 'ground-4': 'flower-bed', 'ground-7': 'campfire', 'sky-1': 'kite' },
     isSample: true,
     updatedAt: Date.now(),

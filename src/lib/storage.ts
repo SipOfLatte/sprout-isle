@@ -1,6 +1,7 @@
 // Loads and saves app state in localStorage and creates the starting state for new players.
 
 import { parseState } from './schema';
+import { emptyTrash } from './trash';
 import type { AppState } from './types';
 
 const KEY = 'sprout-isle/state/v1';
@@ -29,6 +30,7 @@ export function emptyState(): AppState {
     purchases: [],
     placements: {},
     checkins: {},
+    trash: emptyTrash(),
     isSample: false,
     updatedAt: 0,
   };

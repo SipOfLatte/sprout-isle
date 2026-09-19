@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.8.0 (2026-09-19)
+
+### Added
+- An Undo button for 5 seconds after you delete or pause a habit, or delete a to-do. Deleting still asks first.
+- A Paused, deleted and done section on the You tab with three lists.
+- Paused: resume or delete each habit, or move them all to Recently deleted with Clear all.
+- Deleted: habits and to-dos you deleted in the last 7 days. Restore one to put it back where it was, with its history, streaks and XP. You can also delete one forever, or clear the whole list.
+- Done: every finished to-do grouped by the day you did it, newest or oldest first. Not done puts one back on your list.
+- A See done link on the to-dos card that opens the Done list.
+
+### Changed
+- Deleting a habit or to-do moves it to Recently deleted instead of removing it straight away. Items there are removed for good after 7 days.
+- Deleting a to-do now asks first.
+
 ## 2.7.0 (2026-09-18)
 
 ### Changed

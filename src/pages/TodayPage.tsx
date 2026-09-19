@@ -16,7 +16,8 @@ import { CalendarButton, WeekStrip } from '../components/DayBrowser';
 import { diffDays, formatLong, type DateKey } from '../lib/dates';
 import { openDay } from '../lib/nav';
 import { dayTally, isActiveOn, isDueOn } from '../lib/engine';
-import { XP_BY_DIFFICULTY, type Difficulty, type Habit } from '../lib/types';
+import { XP_BY_DIFFICULTY, type Difficulty, type Habit, type Todo } from '../lib/types';
+import { confirmAction } from '../components/Dialog';
 import { useFx } from '../state/fx';
 import { useStore } from '../state/store';
 
@@ -160,13 +161,20 @@ export function TodayPage({ dayParam, onNavigate }: { dayParam?: string; onNavig
 
 /** One-off tasks. Open to-dos appear on every day from when they were added; finished ones show only on the day they were done. */
 function Todos({ day, readOnly }: { day: DateKey; readOnly: boolean }) {
-  const { state, dispatch } = useStore();
-  const { launchSeed } = useFx();
+  const { state, dispatch, today } = useStore();
+  const { launchSeed, undoToast } = useFx();
   const [name, setName] = useState('');
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const visible = state.todos.filter((t) => (t.doneOn ? t.doneOn === day : t.createdOn <= day));
+
+  const remove = (t: Todo) => {
+    if (!confirmAction(`Delete "${t.name}"? It moves to Recently deleted on the You tab, where you can restore it for 7 days.`)) return;
+    dispatch({ type: 'deleteTodo', id: t.id, day: today });
+    undoToast(`Deleted ${t.name}`, () => dispatch({ type: 'restoreDeleted', todos: [t.id] }));
+  };
+  const doneCount = state.todos.filter((t) => t.doneOn).length;
 
   const add = (e: FormEvent) => {
     e.preventDefault();
@@ -179,7 +187,14 @@ function Todos({ day, readOnly }: { day: DateKey; readOnly: boolean }) {
 
   return (
     <section className="todos" aria-labelledby="todos-title">
-      <h2 id="todos-title">To-dos</h2>
+      <header className="todos__head">
+        <h2 id="todos-title">To-dos</h2>
+        {doneCount > 0 && (
+          <a className="link" href="#me/done">
+            See done ({doneCount})
+          </a>
+        )}
+      </header>
       {!readOnly && (
       <form className="todo-add" onSubmit={add}>
         <label className="visually-hidden" htmlFor="todo-name">
@@ -227,7 +242,7 @@ function Todos({ day, readOnly }: { day: DateKey; readOnly: boolean }) {
               </div>
               <div className="habit__side">
                 <span className="xp-chip">+{XP_BY_DIFFICULTY[t.difficulty]}</span>
-                <button type="button" className="icon-btn" disabled={readOnly} onClick={() => dispatch({ type: 'deleteTodo', id: t.id })} aria-label={`Delete ${t.name}`}>
+                <button type="button" className="icon-btn" disabled={readOnly} onClick={() => remove(t)} aria-label={`Delete ${t.name}`}>
                   <Icon name="trash" size={14} />
                 </button>
               </div>

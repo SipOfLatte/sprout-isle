@@ -2,6 +2,7 @@
 // against this schema, with size limits, before it reaches the app.
 
 import { z } from 'zod';
+import { MAX_TRASH } from './trash';
 import type { AppState } from './types';
 
 const dateKey = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
@@ -26,6 +27,29 @@ const quest = z.object({
   area: area.optional(),
 });
 
+const habit = z.object({
+  id,
+  name,
+  area,
+  schedule,
+  target: z.number().int().min(1).max(10_000),
+  unit: z.string().trim().max(20),
+  difficulty,
+  createdOn: dateKey,
+  archivedOn: dateKey.nullable(),
+});
+
+const todo = z.object({ id, name, area: area.nullable().default(null), difficulty, createdOn: dateKey, doneOn: dateKey.nullable() });
+
+const position = z.number().int().min(0).max(10_000);
+
+const trash = z.object({
+  habits: z
+    .array(z.object({ habit, logs: z.record(dateKey, z.number().int().min(0).max(10_000)), deletedOn: dateKey, index: position }))
+    .max(MAX_TRASH.habits),
+  todos: z.array(z.object({ todo, deletedOn: dateKey, index: position })).max(MAX_TRASH.todos),
+});
+
 const slug = z.string().min(1).max(40).regex(/^[a-z0-9-]+$/);
 
 export const MAX_HABITS = 100;
@@ -34,24 +58,8 @@ export const LIMITS = { importBytes: 5_000_000 };
 export const stateSchema = z.object({
   version: z.literal(1),
   worldName: z.string().trim().min(1).max(40),
-  habits: z
-    .array(
-      z.object({
-        id,
-        name,
-        area,
-        schedule,
-        target: z.number().int().min(1).max(10_000),
-        unit: z.string().trim().max(20),
-        difficulty,
-        createdOn: dateKey,
-        archivedOn: dateKey.nullable(),
-      }),
-    )
-    .max(MAX_HABITS),
-  todos: z
-    .array(z.object({ id, name, area: area.nullable().default(null), difficulty, createdOn: dateKey, doneOn: dateKey.nullable() }))
-    .max(5_000),
+  habits: z.array(habit).max(MAX_HABITS),
+  todos: z.array(todo).max(5_000),
   rewards: z.array(z.object({ id, name, cost: z.number().int().min(1).max(100_000) })).max(200),
   redemptions: z
     .array(z.object({ id, rewardId: id, name, cost: z.number().int().min(1).max(100_000), on: dateKey }))
@@ -71,6 +79,7 @@ export const stateSchema = z.object({
   checkins: z
     .record(dateKey, z.object({ mood: z.number().int().min(1).max(5).nullable(), energy: z.number().int().min(1).max(5).nullable() }))
     .default({}),
+  trash: trash.default({ habits: [], todos: [] }),
   isSample: z.boolean(),
   updatedAt: z.number().int().min(0).default(0),
 });

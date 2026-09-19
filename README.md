@@ -14,6 +14,8 @@ To look around without tracking anything yourself, open the You tab and choose L
 
 A habit can be yes or no, or an amount like 8 glasses of water. It can repeat every day, on chosen weekdays, or a set number of times a week, and you can edit, pause or delete it whenever you like. There's also a to-do list for chores and one-off tasks, which earn XP by effort without belonging to a part of life. You can drag habits and to-dos into whatever order you like.
 
+Mistakes are easy to take back. Deleting or pausing something shows an Undo button for 5 seconds. Deleted habits and to-dos wait in Recently deleted on the You tab for 7 days, and restoring a habit brings back its whole history, so streaks, XP and charts return as they were. The same place lists paused habits and every finished to-do, grouped by day.
+
 The week strip and calendar on Today open any past day. You can still tick things off for the last seven days. Older days are read-only so streaks stay honest.
 
 Once a day you can rate your mood and energy from 1 to 5. Both are optional, and checking in counts as showing up for your streak.
@@ -83,6 +85,7 @@ The app stores only what you enter: habits, the amount logged each day, to-dos, 
 | [`src/lib/bosses.ts`](src/lib/bosses.ts) | Boss HP, damage, wins and loot |
 | [`src/lib/pets.ts`](src/lib/pets.ts) | Companion growth and mood |
 | [`src/lib/catalog.ts`](src/lib/catalog.ts) | Store items, boss details and the spots on the island |
+| [`src/lib/trash.ts`](src/lib/trash.ts) | Recently deleted: moving habits with their logs out and back in place, and clearing items after 7 days |
 | [`src/lib/schema.ts`](src/lib/schema.ts) | The zod schema that anything loaded from storage, a backup or a gist has to pass |
 | [`src/sync/`](src/sync) | The gist client and the logic that decides whether to upload, download or ask |
 | [`src/world/`](src/world) | Pixel sprites and the island scene builder |

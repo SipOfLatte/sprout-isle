@@ -15,7 +15,7 @@ const habit = (overrides: Partial<Habit> = {}): Habit => ({
 
 const state = (extra: Partial<AppState>): AppState => ({
   version: 1, worldName: 'x', habits: [], todos: [], rewards: [], redemptions: [], logs: {}, quests: {}, bosses: {},
-  companion: null, purchases: [], placements: {}, checkins: {}, isSample: false, updatedAt: 0, ...extra,
+  companion: null, purchases: [], placements: {}, checkins: {}, trash: { habits: [], todos: [] }, isSample: false, updatedAt: 0, ...extra,
 });
 
 describe('stats', () => {

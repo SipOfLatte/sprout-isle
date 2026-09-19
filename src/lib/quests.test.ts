@@ -24,7 +24,7 @@ function habit(overrides: Partial<Habit> = {}): Habit {
 }
 
 const state = (habits: Habit[], logs: AppState['logs'] = {}, quests: AppState['quests'] = {}): AppState => ({
-  version: 1, worldName: 'x', habits, todos: [], rewards: [], redemptions: [], logs, quests, bosses: {}, companion: null, purchases: [], placements: {}, checkins: {}, isSample: false, updatedAt: 0,
+  version: 1, worldName: 'x', habits, todos: [], rewards: [], redemptions: [], logs, quests, bosses: {}, companion: null, purchases: [], placements: {}, checkins: {}, trash: { habits: [], todos: [] }, isSample: false, updatedAt: 0,
 });
 
 describe('generateQuests', () => {

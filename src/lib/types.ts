@@ -90,6 +90,27 @@ export interface CheckIn {
   energy: number | null;
 }
 
+/** A habit in Recently deleted, kept with its history so restoring brings its streaks and charts back. */
+export interface DeletedHabit {
+  habit: Habit;
+  /** logs[date] = amount, taken out of the main logs when the habit was deleted. */
+  logs: Record<DateKey, number>;
+  deletedOn: DateKey;
+  /** Position in the habit list when deleted, so a restore puts it back in place. */
+  index: number;
+}
+
+export interface DeletedTodo {
+  todo: Todo;
+  deletedOn: DateKey;
+  index: number;
+}
+
+export interface Trash {
+  habits: DeletedHabit[];
+  todos: DeletedTodo[];
+}
+
 /** logs[date][habitId] = amount logged that day. */
 export type Logs = Record<DateKey, Record<string, number>>;
 
@@ -110,6 +131,8 @@ export interface AppState {
   /** placements[slotId] = itemId placed on the island. */
   placements: Record<string, string>;
   checkins: Record<DateKey, CheckIn>;
+  /** Recently deleted habits and to-dos, kept for 7 days. */
+  trash: Trash;
   isSample: boolean;
   /** Epoch ms of the last local change; drives sync conflict detection. */
   updatedAt: number;

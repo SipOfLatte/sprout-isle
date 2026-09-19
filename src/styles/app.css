@@ -475,6 +475,19 @@ select {
   animation: toast-in 240ms ease-out;
 }
 
+.toast__text {
+  display: grid;
+  min-width: 0;
+}
+
+/* The toast layer ignores taps so it never blocks the page; toasts with an Undo button take them back. */
+.toast--undo {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+}
+
 .toast strong {
   font-family: var(--font-display);
   font-weight: 500;
@@ -1032,6 +1045,18 @@ select {
 }
 
 /* Name on its own line on phones, then effort and Add side by side. One row on wider screens. */
+.todos__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.todos__head .link {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
 .todo-add {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -1768,6 +1793,63 @@ input::placeholder {
 }
 
 /* ---- Me ----------------------------------------------------------------- */
+
+.archive__tabs {
+  display: flex;
+  margin-bottom: 14px;
+}
+
+.archive__tabs button {
+  flex: 1;
+}
+
+.archive__count {
+  font-family: var(--font-display);
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.archive__list li > div:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Stacked on phones so the name keeps its room; side by side on wider screens. */
+.archive__list .archive__actions {
+  display: grid;
+  gap: 6px;
+  flex: none;
+}
+
+@media (min-width: 640px) {
+  .archive__list .archive__actions {
+    display: flex;
+  }
+}
+
+.archive__empty,
+.archive__note {
+  margin: 0 0 8px;
+}
+
+.archive__list {
+  margin-bottom: 12px;
+}
+
+.archive__order {
+  margin-bottom: 8px;
+}
+
+.me .archive__day h3 {
+  margin: 14px 0 0;
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+.archive__clear,
+.archive__more {
+  margin-top: 4px;
+}
 
 .me section {
   margin-bottom: 28px;
